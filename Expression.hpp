@@ -134,6 +134,12 @@ Expression<Unsigned> sqrt(const Expression<Unsigned>& x)
     return Expression<Unsigned>();
 }
 
+template<typename Unsigned>
+std::ostream& operator<<(std::ostream& stream, const Expression<Unsigned>& x)
+{
+  return stream << x.first << " = " << x.second;
+}
+
 } // namespace Chic
 
 #endif // CHIC_EXPRESSION_HPP
