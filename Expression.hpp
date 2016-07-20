@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <string>
+#include <sstream>
 #include <cmath>
 
 namespace Chic {
@@ -13,6 +14,7 @@ struct Expression
 {
   Expression();
   Expression(const Unsigned&, const std::string&);
+  Expression(const Unsigned&);
   Expression(std::size_t, int);
 };
 
@@ -25,6 +27,15 @@ template<typename Unsigned>
 Expression<Unsigned>::Expression(const Unsigned& value, const std::string& expression)
   : std::pair<Unsigned, std::string>(value, expression)
 {}
+
+template<typename Unsigned>
+Expression<Unsigned>::Expression(const Unsigned& value)
+  : std::pair<Unsigned, std::string>(value, "")
+{
+  std::ostringstream stream;
+  stream << value;
+  this->second = stream.str();
+}
 
 template<typename Unsigned>
 Expression<Unsigned>::Expression(std::size_t repeats, int digit)
