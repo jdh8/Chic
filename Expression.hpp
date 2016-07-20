@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <string>
+#include <cmath>
 
 namespace Chic {
 
@@ -109,6 +110,17 @@ Expression<Unsigned> pow(const Expression<Unsigned>& x, const Expression<Unsigne
   }
 
   return result;
+}
+
+template<typename Unsigned>
+Expression<Unsigned> sqrt(const Expression<Unsigned>& x)
+{
+  Expression<Unsigned> result(std::sqrt(x.first) + 0.5, "√" + x.second);
+
+  if (result.first * result.first == x.first)
+    return result;
+  else
+    return Expression<Unsigned>();
 }
 
 } // namespace Chic
