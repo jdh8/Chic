@@ -83,6 +83,34 @@ Expression<Unsigned> operator/(const Expression<Unsigned>& x, const Expression<U
   return result;
 }
 
+template<typename Unsigned>
+Expression<Unsigned> pow(const Expression<Unsigned>& x, const Expression<Unsigned>& y)
+{
+  Expression<Unsigned> result(1, "(" + x.second + " ^ " + y.second + ")");
+  Unsigned base = x.first;
+
+  if (!(base && y.first))
+    return Expression<Unsigned>();
+
+  for (Unsigned exponent = y.first; exponent; exponent >>= 1) {
+    if (exponent & 1) {
+      Unsigned cache = result.first;
+      result.first *= base;
+
+      if (result.first / base != cache)
+        return Expression<Unsigned>();
+    }
+
+    Unsigned cache = base;
+    base *= base;
+
+    if (base / cache != cache)
+      return Expression<Unsigned>();
+  }
+
+  return result;
+}
+
 } // namespace Chic
 
 #endif // CHIC_EXPRESSION_HPP
