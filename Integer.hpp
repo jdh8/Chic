@@ -42,8 +42,8 @@ class Integer
   public:
     Integer(const Unsigned& = Unsigned());
     Integer(std::size_t, int);
+    const Unsigned& value() const;
     operator const Unsigned&() const;
-    const Unsigned& operator()() const;
 };
 
 template<typename Unsigned>
@@ -69,15 +69,15 @@ Integer<Unsigned>::Integer(std::size_t repeats, int digit)
 }
 
 template<typename Unsigned>
-Integer<Unsigned>::operator const Unsigned&() const
+const Unsigned& Integer<Unsigned>::value() const
 {
   return _value;
 }
 
 template<typename Unsigned>
-const Unsigned& Integer<Unsigned>::operator()() const
+Integer<Unsigned>::operator const Unsigned&() const
 {
-  return *this;
+  return _value;
 }
 
 /*!
@@ -88,7 +88,7 @@ const Unsigned& Integer<Unsigned>::operator()() const
 template<typename Unsigned>
 Integer<Unsigned> operator+(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
-  Unsigned result = x() + y();
+  Unsigned result = x.value() + y.value();
   return (x <= result) * result;
 }
 
@@ -100,7 +100,7 @@ Integer<Unsigned> operator+(const Integer<Unsigned>& x, const Integer<Unsigned>&
 template<typename Unsigned>
 Integer<Unsigned> operator-(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
-  return (x >= y) * (x() - y());
+  return (x >= y) * (x.value() - y.value());
 }
 
 /*!
@@ -111,8 +111,8 @@ Integer<Unsigned> operator-(const Integer<Unsigned>& x, const Integer<Unsigned>&
 template<typename Unsigned>
 Integer<Unsigned> operator*(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
-  Unsigned result = x() * y();
-  return (x && result / x() == y) * result;
+  Unsigned result = x.value() * y.value();
+  return (x && result / x.value() == y) * result;
 }
 
 /*!
@@ -123,7 +123,7 @@ Integer<Unsigned> operator*(const Integer<Unsigned>& x, const Integer<Unsigned>&
 template<typename Unsigned>
 Integer<Unsigned> operator/(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
-  return (y && x % y == 0) * (x() / y());
+  return (y && x % y == 0) * (x.value() / y.value());
 }
 
 /*!
@@ -152,7 +152,7 @@ Integer<Unsigned> pow(Integer<Unsigned> base, const Integer<Unsigned>& y)
 template<typename Unsigned>
 Integer<Unsigned> sqrt(const Integer<Unsigned>& x)
 {
-  Unsigned result = std::sqrt(x());
+  Unsigned result = std::sqrt(x.value());
   return (result * result == x) * result;
 }
 
