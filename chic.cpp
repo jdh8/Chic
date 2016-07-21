@@ -3,7 +3,7 @@
 #include <sstream>
 
 template<typename Unsigned>
-void program(const Unsigned& target, int limit = 10)
+void program(const Unsigned& target, int limit = 30)
 {
   for (int digit = 1; digit <= 9; ++digit)
     std::cout << Chic::find(limit, digit, target) << std::endl;
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
       return 0;
   }
 
-  std::cout << "Usage: " << argv[0] << " TARGET [LIMIT = 10]\n\n"
+  std::cout << "Usage: " << argv[0] << " TARGET [LIMIT = 30]\n\n"
     "TARGET  The result to make\n"
     "LIMIT   Maximum number of digits\n"
     "\n"
