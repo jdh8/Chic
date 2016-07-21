@@ -18,6 +18,7 @@
 #ifndef CHIC_INTEGER_HPP
 #define CHIC_INTEGER_HPP
 
+#include <vector>
 #include <cmath>
 
 namespace Chic {
@@ -153,6 +154,49 @@ Integer<Unsigned> sqrt(const Integer<Unsigned>& x)
 {
   Unsigned result = std::sqrt(x());
   return (result * result == x) * result;
+}
+
+template<typename Unsigned>
+class Factorial
+{
+  private:
+    std::vector< Integer<Unsigned> > _table;
+
+  public:
+    Factorial();
+    Integer<Unsigned> operator()(const Integer<Unsigned>&) const;
+};
+
+template<typename Unsigned>
+Factorial<Unsigned>::Factorial()
+  : _table(1, 1)
+{
+  for (Integer<Unsigned> k = 1; ; k = k + 1) {
+    Integer<Unsigned> candidate = k * _table.back();
+
+    if (candidate)
+      _table.push_back(candidate);
+    else
+      break;
+  }
+}
+
+template<typename Unsigned>
+Integer<Unsigned> Factorial<Unsigned>::operator()(const Integer<Unsigned>& n) const
+{
+  return n < _table.size() ? _table[n] : Integer<Unsigned>(0);
+}
+
+/*!
+ * \brief Exact factorial
+ *
+ * Overflow causes inexact result, so then 0 is returned.
+ */
+template<typename Unsigned>
+Integer<Unsigned> factorial(const Integer<Unsigned>& n)
+{
+  static const Factorial<Unsigned> implementation;
+  return implementation(n);
 }
 
 } // namespace Chic
