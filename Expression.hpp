@@ -19,71 +19,66 @@
 #define CHIC_EXPRESSION_HPP
 
 #include <string>
+#include <cstring>
 
 namespace Chic {
 
 class Expression
 {
   private:
-    std::string _expr;
+    const Expression* _first;
+
+    union {
+      const Expression* _second;
+      char _digit;
+    };
+
+    union {
+      std::size_t _repeats;
+      char _operator[4];
+    };
 
   public:
-    Expression(const char* = "");
-    Expression(const std::string&);
+    const std::size_t penalty;
+
     Expression(std::size_t, int);
-    const std::string& str() const;
+    Expression(const char*, const Expression&);
+    Expression(const char*, const Expression&, const Expression&);
+    std::string str() const;
 };
 
-inline Expression::Expression(const char* expr)
-  : _expr(expr)
-{}
-
-inline Expression::Expression(const std::string& expr)
-  : _expr(expr)
-{}
-
 inline Expression::Expression(std::size_t repeats, int digit)
-  : _expr(repeats, '0'|digit)
+  : _first(NULL),
+    _digit('0' | digit),
+    _repeats(repeats),
+    penalty(0)
 {}
 
-inline const std::string& Expression::str() const
+inline Expression::Expression(const char* string, const Expression& first)
+  : _first(&first),
+    _second(NULL),
+    penalty(first.penalty + 1)
 {
-  return _expr;
+  std::strncpy(_operator, string, 4);
 }
 
-inline Expression operator+(const Expression& x, const Expression& y)
+inline Expression::Expression(const char* string, const Expression& first, const Expression& second)
+  : _first(&first),
+    _second(&second),
+    penalty(first.penalty + second.penalty + 3 + (string[1] == '/'))
 {
-  return "(" + x.str() + " + " + y.str() + ")";
+  std::strncpy(_operator, string, 4);
 }
 
-inline Expression operator-(const Expression& x, const Expression& y)
+inline std::string Expression::str() const
 {
-  return "(" + x.str() + " - " + y.str() + ")";
-}
-
-inline Expression operator*(const Expression& x, const Expression& y)
-{
-  return "(" + x.str() + " * " + y.str() + ")";
-}
-
-inline Expression operator/(const Expression& x, const Expression& y)
-{
-  return "(" + x.str() + " / " + y.str() + ")";
-}
-
-inline Expression pow(const Expression& x, const Expression& y)
-{
-  return "(" + x.str() + " ^ " + y.str() + ")";
-}
-
-inline Expression sqrt(const Expression& x)
-{
-  return "√" + x.str();
-}
-
-inline Expression factorial(const Expression& x)
-{
-  return x.str() + "!";
+  if (_first)
+    if (_second)
+      return "(" + _first->str() + _operator + _second->str() + ")";
+    else
+      return *_operator == '!' ? _first->str() + _operator : _operator + _first->str();
+  else
+    return std::string(_repeats, _digit);
 }
 
 } // namespace Chic

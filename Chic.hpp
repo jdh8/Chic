@@ -28,55 +28,80 @@ namespace Chic {
 
 namespace internal {
 
-template<typename Map, typename Pair>
-void insert(Map& map, const Pair& pair)
+template<typename Map, typename Unsigned>
+void insert(Map& map, const Integer<Unsigned>& value, const char* infix, const Expression& x, const Expression& y)
 {
-  if (pair.first) {
-    Expression& reference = map[pair.first];
+  if (value) {
+    std::unique_ptr<Expression>& reference = map[value];
+    std::size_t penalty = x.penalty + y.penalty + 3 + (infix[1] == '/');
 
-    if (reference.str().empty() || pair.second.str().size() < reference.str().size())
-      reference = pair.second;
+    if (!reference || penalty < reference->penalty)
+      reference = std::unique_ptr<Expression>(new Expression(infix, x, y));
   }
 }
 
 template<typename Map, typename Pair>
 void insert(Map& map, const Pair& x, const Pair& y)
 {
-  insert(map, Pair(x.first + y.first, x.second + y.second));
-  insert(map, Pair(x.first * y.first, x.second * y.second));
-  insert(map, Pair(pow(x.first, y.first), pow(x.second, y.second)));
-  insert(map, Pair(pow(y.first, x.first), pow(y.second, x.second)));
+  insert(map, x.first + y.first, " + ", *x.second, *y.second);
+  insert(map, x.first * y.first, " * ", *x.second, *y.second);
+  insert(map, pow(x.first, y.first), " ^ ", *x.second, *y.second);
+  insert(map, pow(y.first, x.first), " ^ ", *y.second, *x.second);
 
-  insert(map, Pair(x.first - y.first, x.second - y.second));
-  insert(map, Pair(y.first - x.first, y.second - x.second));
-  insert(map, Pair(x.first / y.first, x.second / y.second));
-  insert(map, Pair(y.first / x.first, y.second / x.second));
+  insert(map, x.first - y.first, " - ", *x.second, *y.second);
+  insert(map, y.first - x.first, " - ", *y.second, *x.second);
+  insert(map, x.first / y.first, " / ", *x.second, *y.second);
+  insert(map, y.first / x.first, " / ", *y.second, *x.second);
 }
 
-template<typename Map>
+template<typename Unsigned, typename Map>
 void replicate_sqrt(Map& map)
 {
-  typedef std::pair<typename Map::key_type, typename Map::mapped_type> Pair;
+  std::vector< std::pair<Integer<Unsigned>, Expression*> > copy;
+  copy.reserve(map.size());
 
-  for (const Pair& x: std::vector<Pair> (map.begin(), map.end())) {
-    for (Pair y(sqrt(x.first), sqrt(x.second)); y.first > 1; ) {
-      map.insert(y);
-      y.first = sqrt(y.first);
-      y.second = sqrt(y.second);
+  for (const auto& pair: map)
+    copy.emplace_back(pair.first, pair.second.get());
+
+  for (const auto& pair: copy) {
+    Integer<Unsigned> first = sqrt(pair.first);
+    Expression* second = pair.second;
+
+    while (first > 2) {
+      std::unique_ptr<Expression>& reference = map[first];
+      std::size_t penalty = second->penalty + 1;
+
+      if (!reference || penalty < reference->penalty) {
+        second = new Expression("√", *second);
+        reference = std::unique_ptr<Expression>(second);
+      }
+      first = sqrt(first);
     }
   }
 }
 
-template<typename Map>
+template<typename Unsigned, typename Map>
 void replicate_factorial(Map& map)
 {
-  typedef std::pair<typename Map::key_type, typename Map::mapped_type> Pair;
+  std::vector< std::pair<Integer<Unsigned>, Expression*> > copy;
+  copy.reserve(map.size());
 
-  for (const Pair& x: std::vector<Pair> (map.begin(), map.end())) {
-    for (Pair y(factorial(x.first), factorial(x.second)); y.first > 2; ) {
-      map.insert(y);
-      y.first = factorial(y.first);
-      y.second = factorial(y.second);
+  for (const auto& pair: map)
+    copy.emplace_back(pair.first, pair.second.get());
+
+  for (const auto& pair: copy) {
+    Integer<Unsigned> first = factorial(pair.first);
+    Expression* second = pair.second;
+
+    while (first > 2) {
+      std::unique_ptr<Expression>& reference = map[first];
+      std::size_t penalty = second->penalty + 1;
+
+      if (!reference || penalty < reference->penalty) {
+        second = new Expression("!", *second);
+        reference = std::unique_ptr<Expression>(second);
+      }
+      first = factorial(first);
     }
   }
 }
@@ -86,15 +111,15 @@ const Map& build(Map* memo, std::size_t size, int digit, const Unsigned& target)
 {
   Map& map = memo[size];
 
-  map[Integer<Unsigned>(size, digit)] = Expression(size, digit);
+  map.emplace(Integer<Unsigned>(size, digit), new Expression(size, digit));
 
   for (std::size_t length = size / 2; length; --length)
     for (const auto& x: memo[length])
       for (const auto& y: memo[size - length])
         insert(map, x, y);
 
-  replicate_sqrt(map);
-  replicate_factorial(map);
+  replicate_sqrt<Unsigned>(map);
+  replicate_factorial<Unsigned>(map);
 
   return map;
 }
@@ -102,9 +127,9 @@ const Map& build(Map* memo, std::size_t size, int digit, const Unsigned& target)
 } // namespace internal
 
 template<typename Unsigned>
-Expression find(std::size_t size, int digit, const Unsigned& target)
+std::string find(std::size_t size, int digit, const Unsigned& target)
 {
-  typedef std::unordered_map<Integer<Unsigned>, Expression, std::hash<Unsigned>> Map;
+  typedef std::unordered_map< Integer<Unsigned>, std::unique_ptr<Expression>, std::hash<Unsigned> > Map;
   std::unique_ptr<Map[]> memo(new Map[size]);
 
   for (std::size_t length = 1; length <= size; ++length) {
@@ -112,10 +137,10 @@ Expression find(std::size_t size, int digit, const Unsigned& target)
     auto found = map.find(target);
 
     if (found != map.end())
-      return found->second;
+      return found->second->str();
   }
 
-  return Expression();
+  return "";
 }
 
 } // namespace Chic

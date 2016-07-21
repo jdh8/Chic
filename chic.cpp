@@ -6,7 +6,7 @@ template<typename Unsigned>
 void program(const Unsigned& target, int limit = 10)
 {
   for (int digit = 1; digit <= 9; ++digit)
-    std::cout << Chic::find(limit, digit, target).str() << std::endl;
+    std::cout << Chic::find(limit, digit, target) << std::endl;
 }
 
 template<typename Unsigned>
