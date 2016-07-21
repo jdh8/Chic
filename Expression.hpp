@@ -31,7 +31,7 @@ class Expression
     Expression(const char* = "");
     Expression(const std::string&);
     Expression(std::size_t, int);
-    const std::string& operator()() const;
+    const std::string& str() const;
 };
 
 inline Expression::Expression(const char* expr)
@@ -46,44 +46,44 @@ inline Expression::Expression(std::size_t repeats, int digit)
   : _expr(repeats, '0'|digit)
 {}
 
-inline const std::string& Expression::operator()() const
+inline const std::string& Expression::str() const
 {
   return _expr;
 }
 
 inline Expression operator+(const Expression& x, const Expression& y)
 {
-  return "(" + x() + " + " + y() + ")";
+  return "(" + x.str() + " + " + y.str() + ")";
 }
 
 inline Expression operator-(const Expression& x, const Expression& y)
 {
-  return "(" + x() + " - " + y() + ")";
+  return "(" + x.str() + " - " + y.str() + ")";
 }
 
 inline Expression operator*(const Expression& x, const Expression& y)
 {
-  return "(" + x() + " * " + y() + ")";
+  return "(" + x.str() + " * " + y.str() + ")";
 }
 
 inline Expression operator/(const Expression& x, const Expression& y)
 {
-  return "(" + x() + " / " + y() + ")";
+  return "(" + x.str() + " / " + y.str() + ")";
 }
 
 inline Expression pow(const Expression& x, const Expression& y)
 {
-  return "(" + x() + " ^ " + y() + ")";
+  return "(" + x.str() + " ^ " + y.str() + ")";
 }
 
 inline Expression sqrt(const Expression& x)
 {
-  return "√" + x();
+  return "√" + x.str();
 }
 
 inline Expression factorial(const Expression& x)
 {
-  return x() + "!";
+  return x.str() + "!";
 }
 
 } // namespace Chic

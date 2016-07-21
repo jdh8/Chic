@@ -6,7 +6,7 @@
 void program(std::uint64_t target, int limit = 10)
 {
   for (int digit = 1; digit <= 9; ++digit)
-    std::cout << Chic::find(limit, digit, target)() << std::endl;
+    std::cout << Chic::find(limit, digit, target).str() << std::endl;
 }
 
 void program(const char* first)
