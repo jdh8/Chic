@@ -1,143 +1,89 @@
+// This file is part of Chic, a Tchisla solver.
+//
+// Copyright (C) 2016 Chen-Pang He <https://jdh8.org/>
+//
+// Chic is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Chic is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef CHIC_EXPRESSION_HPP
 #define CHIC_EXPRESSION_HPP
 
-#include <utility>
 #include <string>
-#include <sstream>
-#include <cmath>
 
 namespace Chic {
 
-template<typename Unsigned>
-struct Expression
-  : std::pair<Unsigned, std::string>
+class Expression
 {
-  Expression();
-  Expression(const Unsigned&, const std::string&);
-  Expression(const Unsigned&);
-  Expression(std::size_t, int);
+  private:
+    std::string _expr;
+
+  public:
+    Expression(const char* = "");
+    Expression(const std::string&);
+    Expression(std::size_t, int);
+    const std::string& operator()() const;
 };
 
-template<typename Unsigned>
-Expression<Unsigned>::Expression()
-  : std::pair<Unsigned, std::string>()
+inline Expression::Expression(const char* expr)
+  : _expr(expr)
 {}
 
-template<typename Unsigned>
-Expression<Unsigned>::Expression(const Unsigned& value, const std::string& expression)
-  : std::pair<Unsigned, std::string>(value, expression)
+inline Expression::Expression(const std::string& expr)
+  : _expr(expr)
 {}
 
-template<typename Unsigned>
-Expression<Unsigned>::Expression(const Unsigned& value)
-  : std::pair<Unsigned, std::string>(value, "")
+inline Expression::Expression(std::size_t repeats, int digit)
+  : _expr(repeats, '0'|digit)
+{}
+
+inline const std::string& Expression::operator()() const
 {
-  std::ostringstream stream;
-  stream << value;
-  this->second = stream.str();
+  return _expr;
 }
 
-template<typename Unsigned>
-Expression<Unsigned>::Expression(std::size_t repeats, int digit)
-  : std::pair<Unsigned, std::string>(0, std::string(repeats, '0'|digit))
+inline Expression operator+(const Expression& x, const Expression& y)
 {
-  while (repeats--)
-    this->first = 10 * this->first + digit;
+  return "(" + x() + " + " + y() + ")";
 }
 
-template<typename Unsigned>
-Expression<Unsigned> operator+(const Expression<Unsigned>& x, const Expression<Unsigned>& y)
+inline Expression operator-(const Expression& x, const Expression& y)
 {
-  Expression<Unsigned> result(x.first + y.first, "");
-
-  if (x.first < result.first)
-    result.second = "(" + x.second + " + " + y.second + ")";
-  else
-    result.first = 0;
-
-  return result;
+  return "(" + x() + " - " + y() + ")";
 }
 
-template<typename Unsigned>
-Expression<Unsigned> operator-(const Expression<Unsigned>& x, const Expression<Unsigned>& y)
+inline Expression operator*(const Expression& x, const Expression& y)
 {
-  Expression<Unsigned> result;
-
-  if (x.first > y.first) {
-    result.first = x.first - y.first;
-    result.second = "(" + x.second + " - " + y.second + ")";
-  }
-  return result;
+  return "(" + x() + " * " + y() + ")";
 }
 
-template<typename Unsigned>
-Expression<Unsigned> operator*(const Expression<Unsigned>& x, const Expression<Unsigned>& y)
+inline Expression operator/(const Expression& x, const Expression& y)
 {
-  Expression<Unsigned> result(x.first * y.first, "");
-
-  if (x.first && result.first / x.first == y.first)
-    result.second = "(" + x.second + " * " + y.second + ")";
-  else
-    result.first = 0;
-
-  return result;
+  return "(" + x() + " / " + y() + ")";
 }
 
-template<typename Unsigned>
-Expression<Unsigned> operator/(const Expression<Unsigned>& x, const Expression<Unsigned>& y)
+inline Expression pow(const Expression& x, const Expression& y)
 {
-  Expression<Unsigned> result;
-
-  if (x.first % y.first == 0) {
-    result.first = x.first / y.first;
-    result.second = "(" + x.second + " / " + y.second + ")";
-  }
-  return result;
+  return "(" + x() + " ^ " + y() + ")";
 }
 
-template<typename Unsigned>
-Expression<Unsigned> pow(const Expression<Unsigned>& x, const Expression<Unsigned>& y)
+inline Expression sqrt(const Expression& x)
 {
-  Expression<Unsigned> result(1, "(" + x.second + " ^ " + y.second + ")");
-  Unsigned base = x.first;
-
-  if (!(base && y.first))
-    return Expression<Unsigned>();
-
-  for (Unsigned exponent = y.first; exponent; exponent >>= 1) {
-    if (exponent & 1) {
-      Unsigned cache = result.first;
-      result.first *= base;
-
-      if (result.first / base != cache)
-        return Expression<Unsigned>();
-    }
-
-    Unsigned cache = base;
-    base *= base;
-
-    if (base / cache != cache)
-      return Expression<Unsigned>();
-  }
-
-  return result;
+  return "√" + x();
 }
 
-template<typename Unsigned>
-Expression<Unsigned> sqrt(const Expression<Unsigned>& x)
+inline Expression factorial(const Expression& x)
 {
-  Expression<Unsigned> result(std::sqrt(x.first) + 0.5, "√" + x.second);
-
-  if (result.first * result.first == x.first)
-    return result;
-  else
-    return Expression<Unsigned>();
-}
-
-template<typename Unsigned>
-std::ostream& operator<<(std::ostream& stream, const Expression<Unsigned>& x)
-{
-  return stream << x.first << " = " << x.second;
+  return x() + "!";
 }
 
 } // namespace Chic
