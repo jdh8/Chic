@@ -31,8 +31,12 @@ namespace internal {
 template<typename Map, typename Pair>
 void insert(Map& map, const Pair& pair)
 {
-  if (pair.first)
-    map.insert(pair);
+  if (pair.first) {
+    Expression& reference = map[pair.first];
+
+    if (reference.str().empty() || pair.second.str().size() < reference.str().size())
+      reference = pair.second;
+  }
 }
 
 template<typename Map, typename Pair>
