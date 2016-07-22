@@ -111,7 +111,7 @@ const Map& build(Map* memo, std::size_t size, int digit, const Unsigned& target)
 {
   Map& map = memo[size];
 
-  map.emplace(Integer<Unsigned>(size, digit), new Expression(size, digit));
+  map[Integer<Unsigned>(size, digit)] = std::unique_ptr<Expression>(new Expression(size, digit));
 
   for (std::size_t length = size / 2; length; --length)
     for (const auto& x: memo[length])
