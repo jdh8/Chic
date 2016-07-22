@@ -41,11 +41,19 @@ class Expression
   public:
     const std::size_t penalty;
 
+    Expression();
     Expression(std::size_t, int);
     Expression(const char*, const Expression&);
     Expression(const char*, const Expression&, const Expression&);
     std::string str() const;
+    operator bool() const;
 };
+
+inline Expression::Expression()
+  : _first(NULL),
+    _repeats(0),
+    penalty(0)
+{}
 
 inline Expression::Expression(std::size_t repeats, int digit)
   : _first(NULL),
@@ -79,6 +87,11 @@ inline std::string Expression::str() const
       return *_operator == '!' ? _first->str() + _operator : _operator + _first->str();
   else
     return std::string(_repeats, _digit);
+}
+
+inline Expression::operator bool() const
+{
+  return _first || _repeats;
 }
 
 } // namespace Chic
