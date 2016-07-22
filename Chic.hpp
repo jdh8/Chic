@@ -57,7 +57,7 @@ void insert(Map& map, const Pair& x, const Pair& y)
 template<typename Unsigned, typename Map>
 void replicate_sqrt(Map& map)
 {
-  std::vector< std::pair<Integer<Unsigned>, Expression*> > copy;
+  std::vector<std::pair<Integer<Unsigned>, Expression*>> copy;
   copy.reserve(map.size());
 
   for (const auto& pair: map)
@@ -83,7 +83,7 @@ void replicate_sqrt(Map& map)
 template<typename Unsigned, typename Map>
 void replicate_factorial(Map& map)
 {
-  std::vector< std::pair<Integer<Unsigned>, Expression*> > copy;
+  std::vector<std::pair<Integer<Unsigned>, Expression*>> copy;
   copy.reserve(map.size());
 
   for (const auto& pair: map)
@@ -129,7 +129,7 @@ const Map& build(Map* memo, std::size_t size, int digit, const Unsigned& target)
 template<typename Unsigned>
 std::string find(std::size_t size, int digit, const Unsigned& target)
 {
-  typedef std::unordered_map< Integer<Unsigned>, std::unique_ptr<Expression>, std::hash<Unsigned> > Map;
+  typedef std::unordered_map<Integer<Unsigned>, std::unique_ptr<Expression>> Map;
   std::unique_ptr<Map[]> memo(new Map[size]);
 
   for (std::size_t length = 1; length <= size; ++length) {

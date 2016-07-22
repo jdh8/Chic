@@ -18,6 +18,7 @@
 #ifndef CHIC_INTEGER_HPP
 #define CHIC_INTEGER_HPP
 
+#include <functional>
 #include <vector>
 #include <cmath>
 
@@ -160,7 +161,7 @@ template<typename Unsigned>
 class Factorial
 {
   private:
-    std::vector< Integer<Unsigned> > _table;
+    std::vector<Integer<Unsigned>> _table;
 
   public:
     Factorial();
@@ -200,5 +201,14 @@ Integer<Unsigned> factorial(const Integer<Unsigned>& n)
 }
 
 } // namespace Chic
+
+namespace std {
+
+template<typename Unsigned>
+struct hash<Chic::Integer<Unsigned>>
+  : hash<Unsigned>
+{};
+
+} // namespace std
 
 #endif // CHIC_INTEGER_HPP
