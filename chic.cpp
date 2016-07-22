@@ -1,6 +1,7 @@
 #include "Chic.hpp"
 #include <iostream>
 #include <sstream>
+#include <cstdint>
 
 template<typename Unsigned>
 void program(const Unsigned& target, int limit = 30)
@@ -36,7 +37,7 @@ void program(const char* first, const char* second)
 
 int main(int argc, char** argv)
 {
-  typedef unsigned int Unsigned;
+  typedef std::uint_fast64_t Unsigned;
   std::ios_base::sync_with_stdio(false);
 
   switch (argc) {
