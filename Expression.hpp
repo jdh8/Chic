@@ -19,8 +19,6 @@
 #define CHIC_EXPRESSION_HPP
 
 #include "Integer.hpp"
-#include <string>
-#include <cstring>
 
 namespace Chic {
 
