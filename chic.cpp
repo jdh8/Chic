@@ -1,60 +1,34 @@
-#include "Chic.hpp"
+#include "Dictionary.hpp"
 #include <iostream>
-#include <sstream>
 #include <cstdint>
 
 template<typename Unsigned>
-void program(const Unsigned& target, int limit = 30)
+static void run(const Unsigned& target)
 {
-  for (int digit = 1; digit <= 9; ++digit)
-    std::cout << Chic::find(limit, digit, target) << std::endl;
-}
+  using namespace Chic;
 
-template<typename Unsigned>
-void program(const char* first)
-{
-  std::istringstream stream(first);
-  Unsigned target;
-  stream >> target;
-  program(target);
-}
-
-template<typename Unsigned>
-void program(const char* first, const char* second)
-{
-  std::istringstream stream(first);
-  Unsigned target;
-  int limit;
-
-  stream >> target;
-
-  stream.clear();
-  stream.str(second);
-  stream >> limit;
-
-  program(target, limit);
+  for (int digit = 1; digit <= 9; ++digit) {
+    Dictionary<Unsigned> dictionary(digit);
+    const Expression<Unsigned>& found = dictionary.build(target);
+    std::cout << found.resolve(dictionary) << std::endl;
+  }
 }
 
 int main(int argc, char** argv)
 {
-  typedef std::uint_fast64_t Unsigned;
   std::ios_base::sync_with_stdio(false);
 
-  switch (argc) {
-    case 2:
-      program<Unsigned>(argv[1]);
-      return 0;
-    case 3:
-      program<Unsigned>(argv[1], argv[2]);
-      return 0;
+  if (argc == 2) {
+    std::istringstream stream(argv[1]);
+    std::uint_fast64_t target;
+    stream >> target;
+    run(target);
   }
-
-  std::cout << "Usage: " << argv[0] << " TARGET [LIMIT = 30]\n\n"
-    "TARGET  The result to make\n"
-    "LIMIT   Maximum number of digits\n"
-    "\n"
-    "Syntactically correct but numerically invalid input\n"
-    "causes undefined behavior.\n";
-    
-  return 1;
+  else {
+    std::cout << "Usage: " << argv[0] << " TARGET\n\n"
+      "TARGET  The result to make\n"
+      "\n"
+      "Syntactically correct but numerically invalid input\n"
+      "causes undefined behavior.\n";
+  }
 }

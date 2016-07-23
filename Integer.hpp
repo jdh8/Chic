@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <vector>
+#include <sstream>
 #include <cmath>
 
 namespace Chic {
@@ -41,10 +42,18 @@ class Integer
     Unsigned _value;
 
   public:
-    Integer(const Unsigned& = Unsigned());
+    Integer() = default;
+    Integer(const Integer&) = default;
+    Integer(const Unsigned&);
     Integer(std::size_t, int);
-    const Unsigned& value() const;
+
     operator const Unsigned&() const;
+    const Unsigned& value() const;
+
+    template<typename Character>
+    std::basic_string<Character> str() const;
+
+    std::string str() const;
 };
 
 template<typename Unsigned>
@@ -70,15 +79,30 @@ Integer<Unsigned>::Integer(std::size_t repeats, int digit)
 }
 
 template<typename Unsigned>
+Integer<Unsigned>::operator const Unsigned&() const
+{
+  return _value;
+}
+
+template<typename Unsigned>
 const Unsigned& Integer<Unsigned>::value() const
 {
   return _value;
 }
 
 template<typename Unsigned>
-Integer<Unsigned>::operator const Unsigned&() const
+template<typename Character>
+std::basic_string<Character> Integer<Unsigned>::str() const
 {
-  return _value;
+  std::basic_ostringstream<Character> stream;
+  stream << _value;
+  return stream.str();
+}
+
+template<typename Unsigned>
+std::string Integer<Unsigned>::str() const
+{
+  return str<char>();
 }
 
 /*!

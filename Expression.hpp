@@ -18,80 +18,67 @@
 #ifndef CHIC_EXPRESSION_HPP
 #define CHIC_EXPRESSION_HPP
 
+#include "Integer.hpp"
 #include <string>
 #include <cstring>
 
 namespace Chic {
 
+template<typename Unsigned>
 class Expression
 {
   private:
-    const Expression* _first;
+    static std::string resolve(const Integer<Unsigned>&);
 
-    union {
-      const Expression* _second;
-      char _digit;
-    };
-
-    union {
-      std::size_t _repeats;
-      char _operator[4];
-    };
+    Integer<Unsigned> _first;
+    Integer<Unsigned> _second;
+    char _operator;
 
   public:
-    const std::size_t penalty;
+    static const char sqrt = 2;
 
-    Expression();
-    Expression(std::size_t, int);
-    Expression(const char*, const Expression&);
-    Expression(const char*, const Expression&, const Expression&);
-    std::string str() const;
+    Expression(const Expression&) = default;
+    Expression(const Integer<Unsigned>& = 0, char = 0);
+    Expression(const Integer<Unsigned>&, const Integer<Unsigned>&, char);
+
     operator bool() const;
+
+    template<typename Graph>
+    std::string resolve(const Graph&) const;
 };
 
-inline Expression::Expression()
-  : _first(NULL),
-    _repeats(0),
-    penalty(0)
+template<typename Unsigned>
+Expression<Unsigned>::Expression(const Integer<Unsigned>& first, char operation)
+  : _first(first),
+    _operator(operation)
 {}
 
-inline Expression::Expression(std::size_t repeats, int digit)
-  : _first(NULL),
-    _digit('0' | digit),
-    _repeats(repeats),
-    penalty(0)
+template<typename Unsigned>
+Expression<Unsigned>::Expression(const Integer<Unsigned>& first, const Integer<Unsigned>& second, char operation)
+  : _first(first),
+    _second(second),
+    _operator(operation)
 {}
 
-inline Expression::Expression(const char* string, const Expression& first)
-  : _first(&first),
-    _second(NULL),
-    penalty(first.penalty + 1)
+template<typename Unsigned>
+Expression<Unsigned>::operator bool() const
 {
-  std::strncpy(_operator, string, 4);
+  return _first;
 }
 
-inline Expression::Expression(const char* string, const Expression& first, const Expression& second)
-  : _first(&first),
-    _second(&second),
-    penalty(first.penalty + second.penalty + 3 + (string[1] == '/'))
+template<typename Unsigned>
+template<typename Graph>
+std::string Expression<Unsigned>::resolve(const Graph& graph) const
 {
-  std::strncpy(_operator, string, 4);
-}
-
-inline std::string Expression::str() const
-{
-  if (_first)
-    if (_second)
-      return "(" + _first->str() + _operator + _second->str() + ")";
-    else
-      return *_operator == '!' ? _first->str() + _operator : _operator + _first->str();
-  else
-    return std::string(_repeats, _digit);
-}
-
-inline Expression::operator bool() const
-{
-  return _first || _repeats;
+  switch (_operator) {
+    case 0:
+      return _first ? _first.str() : "";
+    case sqrt:
+      return "√" + graph[_first].resolve(graph);
+    case '!':
+      return graph[_first].resolve(graph) + '!';
+  }
+  return '(' + graph[_first].resolve(graph) + ' ' + _operator + ' ' + graph[_second].resolve(graph) + ')';
 }
 
 } // namespace Chic
