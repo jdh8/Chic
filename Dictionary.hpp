@@ -112,7 +112,7 @@ void Dictionary<Unsigned>::build()
 template<typename Unsigned>
 const Expression<Unsigned>& Dictionary<Unsigned>::operator[](const Integer<Unsigned>& key) const
 {
-  static const Expression<Unsigned> empty;
+  static const Expression<Unsigned> empty(0);
   auto found = _graph.find(key);
   return found == _graph.end() ? empty : found->second;
 }

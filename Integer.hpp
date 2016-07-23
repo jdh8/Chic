@@ -43,7 +43,6 @@ class Integer
 
   public:
     Integer() = default;
-    Integer(const Integer&) = default;
     Integer(const Unsigned&);
     Integer(std::size_t, int);
 
