@@ -1,17 +1,25 @@
 #include "Dictionary.hpp"
+#include <future>
 #include <iostream>
 #include <cstdint>
 
 template<typename Unsigned>
+static std::string find(const Unsigned& target, int digit)
+{
+  Chic::Dictionary<Unsigned> dictionary(digit);
+  return dictionary.build(target).resolve(dictionary);
+}
+
+template<typename Unsigned>
 static void run(const Unsigned& target)
 {
-  using namespace Chic;
+  std::future<std::string> message[10];
 
-  for (int digit = 1; digit <= 9; ++digit) {
-    Dictionary<Unsigned> dictionary(digit);
-    const Expression<Unsigned>& found = dictionary.build(target);
-    std::cout << found.resolve(dictionary) << std::endl;
-  }
+  for (int digit = 1; digit <= 9; ++digit)
+    message[digit] = std::async(find<Unsigned>, target, digit);
+
+  for (int digit = 1; digit <= 9; ++digit)
+    std::cout << message[digit].get() << std::endl;
 }
 
 int main(int argc, char** argv)
