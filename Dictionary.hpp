@@ -60,24 +60,22 @@ void Dictionary<Unsigned>::emplace(const Integer<Unsigned>& key, const Expressio
 template<typename Unsigned>
 void Dictionary<Unsigned>::binary(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
-  typedef Expression<Unsigned> Expr;
+  emplace(x + y, { x, y, '+' });
+  emplace(x * y, { x, y, '*' });
+  emplace(pow(x, y), { x, y, '^' });
+  emplace(pow(y, x), { y, x, '^' });
 
-  emplace(x + y, Expr(x, y, '+'));
-  emplace(x * y, Expr(x, y, '*'));
-  emplace(pow(x, y), Expr(x, y, '^'));
-  emplace(pow(y, x), Expr(y, x, '^'));
-
-  emplace(x - y, Expr(x, y, '-'));
-  emplace(y - x, Expr(y, x, '-'));
-  emplace(x / y, Expr(x, y, '/'));
-  emplace(y / x, Expr(y, x, '/'));
+  emplace(x - y, { x, y, '-' });
+  emplace(y - x, { y, x, '-' });
+  emplace(x / y, { x, y, '/' });
+  emplace(y / x, { y, x, '/' });
 }
 
 template<typename Unsigned>
 template<typename Function>
 void Dictionary<Unsigned>::unary(const Function& function, char operation)
 {
-  std::vector<Integer<Unsigned>>& destination = _hierarchy.back();
+  auto& destination = _hierarchy.back();
   std::vector<Integer<Unsigned>> source;
 
   for (auto x: destination)
@@ -121,7 +119,7 @@ template<typename Unsigned>
 const Expression<Unsigned>& Dictionary<Unsigned>::build(const Integer<Unsigned>& key)
 {
   while (true) {
-    if (const Expression<Unsigned>& found = operator[](key))
+    if (const auto& found = operator[](key))
       return found;
     build();
   }
