@@ -37,19 +37,44 @@ class Dictionary
     template<typename Function>
     void unary(const Function&, char);
 
-    void build();
-
   public:
     Dictionary(int);
+
     const Expression<Unsigned>& operator[](const Integer<Unsigned>&) const;
-    const Expression<Unsigned>& build(const Integer<Unsigned>&);
     std::string resolve(const Expression<Unsigned>&) const;
+
+    void grow();
+    const Expression<Unsigned>& build(const Integer<Unsigned>&);
 };
 
 template<typename Unsigned>
 Dictionary<Unsigned>::Dictionary(int digit)
   : _digit(digit)
 {}
+
+template<typename Unsigned>
+const Expression<Unsigned>& Dictionary<Unsigned>::operator[](const Integer<Unsigned>& key) const
+{
+  static const Expression<Unsigned> empty;
+  auto found = _graph.find(key);
+  return found == _graph.end() ? empty : found->second;
+}
+
+template<typename Unsigned>
+std::string Dictionary<Unsigned>::resolve(const Expression<Unsigned>& expr) const
+{
+  const auto& first = expr.first();
+
+  switch (expr.symbol()) {
+    case 0:
+      return first ? first.str() : "";
+    case Expression<Unsigned>::sqrt:
+      return "√" + resolve(operator[](first));
+    case '!':
+      return resolve(operator[](first)) + '!';
+  }
+  return '(' + resolve(operator[](first)) + ' ' + expr.symbol() + ' ' + resolve(operator[](expr.second())) + ')';
+}
 
 template<typename Unsigned>
 void Dictionary<Unsigned>::emplace(const Integer<Unsigned>& key, const Expression<Unsigned>& expr)
@@ -88,7 +113,7 @@ void Dictionary<Unsigned>::unary(const Function& function, char symbol)
 }
 
 template<typename Unsigned>
-void Dictionary<Unsigned>::build()
+void Dictionary<Unsigned>::grow()
 {
   _hierarchy.emplace_back();
 
@@ -109,37 +134,13 @@ void Dictionary<Unsigned>::build()
 }
 
 template<typename Unsigned>
-const Expression<Unsigned>& Dictionary<Unsigned>::operator[](const Integer<Unsigned>& key) const
-{
-  static const Expression<Unsigned> empty(0);
-  auto found = _graph.find(key);
-  return found == _graph.end() ? empty : found->second;
-}
-
-template<typename Unsigned>
 const Expression<Unsigned>& Dictionary<Unsigned>::build(const Integer<Unsigned>& key)
 {
   while (true) {
     if (const auto& found = operator[](key))
       return found;
-    build();
+    grow();
   }
-}
-
-template<typename Unsigned>
-std::string Dictionary<Unsigned>::resolve(const Expression<Unsigned>& expr) const
-{
-  const auto& first = expr.first();
-
-  switch (expr.symbol()) {
-    case 0:
-      return first ? first.str() : "";
-    case Expression<Unsigned>::sqrt:
-      return "√" + resolve(operator[](first));
-    case '!':
-      return resolve(operator[](first)) + '!';
-  }
-  return '(' + resolve(operator[](first)) + ' ' + expr.symbol() + ' ' + resolve(operator[](expr.second())) + ')';
 }
 
 } // namespace Chic
