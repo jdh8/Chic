@@ -35,8 +35,7 @@ class Expression
   public:
     static const char sqrt = 2;
 
-    Expression() = default;
-    Expression(const Integer<Unsigned>&, char = 0);
+    Expression(const Integer<Unsigned>& = 0, char = 0);
     Expression(const Integer<Unsigned>&, const Integer<Unsigned>&, char);
 
     operator bool() const;

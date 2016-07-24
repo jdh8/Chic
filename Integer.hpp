@@ -42,8 +42,7 @@ class Integer
     Unsigned _value;
 
   public:
-    Integer() = default;
-    Integer(const Unsigned&);
+    Integer(const Unsigned& = 0);
     Integer(std::size_t, int);
 
     operator const Unsigned&() const;
