@@ -41,6 +41,9 @@ class Dictionary
     Dictionary(int);
 
     const Expression<Unsigned>& operator[](const Integer<Unsigned>&) const;
+    const std::unordered_map<Integer<Unsigned>, Expression<Unsigned>>& graph() const;
+    const std::vector<std::vector<Integer<Unsigned>>>& hierarchy() const;
+    int digit() const;
     std::string resolve(const Expression<Unsigned>&) const;
 
     void grow();
@@ -58,6 +61,24 @@ const Expression<Unsigned>& Dictionary<Unsigned>::operator[](const Integer<Unsig
   static const Expression<Unsigned> empty;
   auto found = _graph.find(key);
   return found == _graph.end() ? empty : found->second;
+}
+
+template<typename Unsigned>
+const std::unordered_map<Integer<Unsigned>, Expression<Unsigned>>& Dictionary<Unsigned>::graph() const
+{
+  return _graph;
+}
+
+template<typename Unsigned>
+const std::vector<std::vector<Integer<Unsigned>>>& Dictionary<Unsigned>::hierarchy() const
+{
+  return _hierarchy;
+}
+
+template<typename Unsigned>
+int Dictionary<Unsigned>::digit() const
+{
+  return _digit;
 }
 
 template<typename Unsigned>
