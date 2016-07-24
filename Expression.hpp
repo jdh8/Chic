@@ -26,8 +26,6 @@ template<typename Unsigned>
 class Expression
 {
   private:
-    static std::string resolve(const Integer<Unsigned>&);
-
     Integer<Unsigned> _first;
     Integer<Unsigned> _second;
     char _operator;
