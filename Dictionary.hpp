@@ -64,16 +64,17 @@ template<typename Unsigned>
 std::string Dictionary<Unsigned>::resolve(const Expression<Unsigned>& expr) const
 {
   const auto& first = expr.first();
+  auto found = _graph.find(first);
 
   switch (expr.symbol()) {
     case 0:
       return first ? first.str() : "";
     case Expression<Unsigned>::sqrt:
-      return "√" + resolve(operator[](first));
+      return "√" + resolve(found->second);
     case '!':
-      return resolve(operator[](first)) + '!';
+      return resolve(found->second) + '!';
   }
-  return '(' + resolve(operator[](first)) + ' ' + expr.symbol() + ' ' + resolve(operator[](expr.second())) + ')';
+  return '(' + resolve(found->second) + ' ' + expr.symbol() + ' ' + resolve(_graph.find(expr.second())->second) + ')';
 }
 
 template<typename Unsigned>
