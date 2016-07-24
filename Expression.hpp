@@ -28,7 +28,7 @@ class Expression
   private:
     Integer<Unsigned> _first;
     Integer<Unsigned> _second;
-    char _operator;
+    char _symbol;
 
   public:
     static const char sqrt = 2;
@@ -36,44 +36,47 @@ class Expression
     Expression(const Integer<Unsigned>& = 0, char = 0);
     Expression(const Integer<Unsigned>&, const Integer<Unsigned>&, char);
 
+    const Integer<Unsigned>& first() const;
+    const Integer<Unsigned>& second() const;
+    char symbol() const;
     operator bool() const;
-
-    template<typename Graph>
-    std::string resolve(const Graph&) const;
 };
 
 template<typename Unsigned>
-Expression<Unsigned>::Expression(const Integer<Unsigned>& first, char operation)
+Expression<Unsigned>::Expression(const Integer<Unsigned>& first, char symbol)
   : _first(first),
-    _operator(operation)
+    _symbol(symbol)
 {}
 
 template<typename Unsigned>
-Expression<Unsigned>::Expression(const Integer<Unsigned>& first, const Integer<Unsigned>& second, char operation)
+Expression<Unsigned>::Expression(const Integer<Unsigned>& first, const Integer<Unsigned>& second, char symbol)
   : _first(first),
     _second(second),
-    _operator(operation)
+    _symbol(symbol)
 {}
 
 template<typename Unsigned>
-Expression<Unsigned>::operator bool() const
+const Integer<Unsigned>& Expression<Unsigned>::first() const
 {
   return _first;
 }
 
 template<typename Unsigned>
-template<typename Graph>
-std::string Expression<Unsigned>::resolve(const Graph& graph) const
+const Integer<Unsigned>& Expression<Unsigned>::second() const
 {
-  switch (_operator) {
-    case 0:
-      return _first ? _first.str() : "";
-    case sqrt:
-      return "√" + graph[_first].resolve(graph);
-    case '!':
-      return graph[_first].resolve(graph) + '!';
-  }
-  return '(' + graph[_first].resolve(graph) + ' ' + _operator + ' ' + graph[_second].resolve(graph) + ')';
+  return _second;
+}
+
+template<typename Unsigned>
+char Expression<Unsigned>::symbol() const
+{
+  return _symbol;
+}
+
+template<typename Unsigned>
+Expression<Unsigned>::operator bool() const
+{
+  return _first;
 }
 
 } // namespace Chic

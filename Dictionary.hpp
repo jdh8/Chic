@@ -43,6 +43,7 @@ class Dictionary
     Dictionary(int);
     const Expression<Unsigned>& operator[](const Integer<Unsigned>&) const;
     const Expression<Unsigned>& build(const Integer<Unsigned>&);
+    std::string resolve(const Expression<Unsigned>&) const;
 };
 
 template<typename Unsigned>
@@ -73,14 +74,14 @@ void Dictionary<Unsigned>::binary(const Integer<Unsigned>& x, const Integer<Unsi
 
 template<typename Unsigned>
 template<typename Function>
-void Dictionary<Unsigned>::unary(const Function& function, char operation)
+void Dictionary<Unsigned>::unary(const Function& function, char symbol)
 {
   auto& destination = _hierarchy.back();
   std::vector<Integer<Unsigned>> source;
 
   for (auto x: destination)
     for (auto y = function(x); y > 2; y = function(y))
-      if (_graph.emplace(y, Expression<Unsigned>(x, operation)).second)
+      if (_graph.emplace(y, Expression<Unsigned>(x, symbol)).second)
         source.emplace_back(x = y);
 
   destination.insert(destination.end(), source.begin(), source.end());
@@ -123,6 +124,22 @@ const Expression<Unsigned>& Dictionary<Unsigned>::build(const Integer<Unsigned>&
       return found;
     build();
   }
+}
+
+template<typename Unsigned>
+std::string Dictionary<Unsigned>::resolve(const Expression<Unsigned>& expr) const
+{
+  const auto& first = expr.first();
+
+  switch (expr.symbol()) {
+    case 0:
+      return first ? first.str() : "";
+    case Expression<Unsigned>::sqrt:
+      return "√" + resolve(operator[](first));
+    case '!':
+      return resolve(operator[](first)) + '!';
+  }
+  return '(' + resolve(operator[](first)) + ' ' + expr.symbol() + ' ' + resolve(operator[](expr.second())) + ')';
 }
 
 } // namespace Chic
