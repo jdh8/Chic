@@ -35,7 +35,7 @@ class Dictionary
     void binary(const Integer<Unsigned>&, const Integer<Unsigned>&);
 
     template<typename Function>
-    void unary(const Function&, char);
+    void unary(const Function&, char, const Unsigned&);
 
   public:
     Dictionary(int);
@@ -121,13 +121,13 @@ void Dictionary<Unsigned>::binary(const Integer<Unsigned>& x, const Integer<Unsi
 
 template<typename Unsigned>
 template<typename Function>
-void Dictionary<Unsigned>::unary(const Function& function, char symbol)
+void Dictionary<Unsigned>::unary(const Function& function, char symbol, const Unsigned& thresh)
 {
   auto& destination = _hierarchy.back();
   std::vector<Integer<Unsigned>> source;
 
   for (auto x: destination)
-    for (auto y = function(x); y > 2; y = function(y))
+    for (auto y = function(x); y > thresh; y = function(y))
       if (_graph.emplace(y, Expression<Unsigned>(x, symbol)).second)
         source.emplace_back(x = y);
 
@@ -151,8 +151,8 @@ void Dictionary<Unsigned>::grow()
       for (const auto& y: base[size - length])
         binary(x, y);
 
-  unary(sqrt<Unsigned>, Expression<Unsigned>::sqrt);
-  unary(factorial<Unsigned>, '!');
+  unary(sqrt<Unsigned>, Expression<Unsigned>::sqrt, 1);
+  unary(factorial<Unsigned>, '!', 2);
 }
 
 template<typename Unsigned>
