@@ -107,7 +107,7 @@ std::string Integer<Unsigned>::str() const
  * Overflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator+=(const Integer<Unsigned>& other)
+Integer<Unsigned>& Integer<Unsigned>::operator+=(const Integer& other)
 {
   _value += other._value;
   _value *= other._value <= _value;
@@ -121,7 +121,7 @@ Integer<Unsigned>& Integer<Unsigned>::operator+=(const Integer<Unsigned>& other)
  * Underflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator-=(const Integer<Unsigned>& other)
+Integer<Unsigned>& Integer<Unsigned>::operator-=(const Integer& other)
 {
   _value = (_value >= other._value) * (_value - other._value);
 
@@ -134,7 +134,7 @@ Integer<Unsigned>& Integer<Unsigned>::operator-=(const Integer<Unsigned>& other)
  * Overflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator*=(const Integer<Unsigned>& other)
+Integer<Unsigned>& Integer<Unsigned>::operator*=(const Integer& other)
 {
   Unsigned result = _value * other._value;
 
@@ -149,7 +149,7 @@ Integer<Unsigned>& Integer<Unsigned>::operator*=(const Integer<Unsigned>& other)
  * If there is no exact quotient, 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer<Unsigned>& other)
+Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer& other)
 {
   _value = (other._value && _value % other._value == 0) * (_value / other._value);
 
