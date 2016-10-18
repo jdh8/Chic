@@ -21,7 +21,18 @@
 #include "Integer.hpp"
 
 namespace Chic {
-
+/*!
+ * \brief Nonnegative fraction with exact arithmetic
+ *
+ * \tparam Unsigned  Underlying unsigned type
+ *
+ * Exact elementary arithmetic, exponentiation, and square root are provided.
+ * If an overflow occurs, infinity is returned.  If the result is otherwise
+ * not representable, nan is returned.
+ *
+ * Unsigned integer overflow wraps around, but signed integer overflow causes
+ * undefined behavior.  Therefore, the underlying type must be unsigned.
+ */
 template<typename Unsigned>
 class Fraction : Base<Fraction<Unsigned>>
 {
