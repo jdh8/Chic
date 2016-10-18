@@ -46,7 +46,7 @@ class Integer : Base<Integer<Unsigned>>
     Integer(const Unsigned& = 0);
     Integer(std::size_t, int);
 
-    const Unsigned& value() const;
+    const Unsigned& value() const { return _value; }
 
     template<typename Character>
     std::basic_string<Character> str() const;
@@ -84,12 +84,6 @@ Integer<Unsigned>::Integer(std::size_t repeats, int digit)
 {
   while (repeats--)
     _value = 10 * _value + digit;
-}
-
-template<typename Unsigned>
-const Unsigned& Integer<Unsigned>::value() const
-{
-  return _value;
 }
 
 template<typename Unsigned>
