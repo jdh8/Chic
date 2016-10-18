@@ -127,7 +127,7 @@ void Dictionary<Unsigned>::unary(const Function& function, char symbol, const Un
   std::vector<Integer<Unsigned>> source;
 
   for (auto x: destination)
-    for (auto y = function(x); y > thresh; y = function(y))
+    for (auto y = function(x); y.value() > thresh; y = function(y))
       if (_graph.emplace(y, Expression<Unsigned>(x, symbol)).second)
         source.emplace_back(x = y);
 

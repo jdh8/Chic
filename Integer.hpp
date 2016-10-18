@@ -18,6 +18,7 @@
 #ifndef CHIC_INTEGER_HPP
 #define CHIC_INTEGER_HPP
 
+#include "Base.hpp"
 #include <functional>
 #include <vector>
 #include <sstream>
@@ -36,7 +37,7 @@ namespace Chic {
  * undefined behavior.  Therefore, the underlying type must be unsigned.
  */
 template<typename Unsigned>
-class Integer
+class Integer : Base<Integer<Unsigned>>
 {
   private:
     Unsigned _value;
@@ -45,13 +46,22 @@ class Integer
     Integer(const Unsigned& = 0);
     Integer(std::size_t, int);
 
-    operator const Unsigned&() const;
     const Unsigned& value() const;
 
     template<typename Character>
     std::basic_string<Character> str() const;
 
     std::string str() const;
+
+    operator bool() const { return _value; }
+
+    Integer& operator++() { ++_value; return *this; }
+    Integer& operator--() { --_value; return *this; }
+
+    Integer& operator+=(const Integer&);
+    Integer& operator-=(const Integer&);
+    Integer& operator*=(const Integer&);
+    Integer& operator/=(const Integer&);
 };
 
 template<typename Unsigned>
@@ -74,12 +84,6 @@ Integer<Unsigned>::Integer(std::size_t repeats, int digit)
 {
   while (repeats--)
     _value = 10 * _value + digit;
-}
-
-template<typename Unsigned>
-Integer<Unsigned>::operator const Unsigned&() const
-{
-  return _value;
 }
 
 template<typename Unsigned>
@@ -109,10 +113,12 @@ std::string Integer<Unsigned>::str() const
  * Overflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> operator+(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+Integer<Unsigned>& Integer<Unsigned>::operator+=(const Integer<Unsigned>& other)
 {
-  Unsigned result = x.value() + y.value();
-  return (x <= result) * result;
+  _value += other._value;
+  _value *= other._value <= _value;
+
+  return *this;
 }
 
 /*!
@@ -121,9 +127,11 @@ Integer<Unsigned> operator+(const Integer<Unsigned>& x, const Integer<Unsigned>&
  * Underflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> operator-(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+Integer<Unsigned>& Integer<Unsigned>::operator-=(const Integer<Unsigned>& other)
 {
-  return (x >= y) * (x.value() - y.value());
+  _value = (_value >= other._value) * (_value - other._value);
+
+  return *this;
 }
 
 /*!
@@ -132,10 +140,13 @@ Integer<Unsigned> operator-(const Integer<Unsigned>& x, const Integer<Unsigned>&
  * Overflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> operator*(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+Integer<Unsigned>& Integer<Unsigned>::operator*=(const Integer<Unsigned>& other)
 {
-  Unsigned result = x.value() * y.value();
-  return (x && result / x.value() == y) * result;
+  Unsigned result = _value * other._value;
+
+  _value = (_value && result / _value == other._value) * result;
+
+  return *this;
 }
 
 /*!
@@ -144,9 +155,23 @@ Integer<Unsigned> operator*(const Integer<Unsigned>& x, const Integer<Unsigned>&
  * If there is no exact quotient, 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> operator/(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer<Unsigned>& other)
 {
-  return (y && x % y == 0) * (x.value() / y.value());
+  _value = (other._value && _value % other._value == 0) * (_value / other._value);
+
+  return *this;
+}
+
+template<typename Unsigned>
+bool operator==(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+{
+  return x.value() == y.value();
+}
+
+template<typename Unsigned>
+bool operator<(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+{
+  return x.value() < y.value();
 }
 
 /*!
@@ -159,7 +184,7 @@ Integer<Unsigned> pow(Integer<Unsigned> base, const Integer<Unsigned>& y)
 {
   Integer<Unsigned> result = 1;
 
-  for (Unsigned exponent = y; exponent; exponent >>= 1) {
+  for (Unsigned exponent = y.value(); exponent; exponent >>= 1) {
     if (exponent & 1)
       result = result * base;
     base = base * base;
@@ -194,7 +219,7 @@ template<typename Unsigned>
 Factorial<Unsigned>::Factorial()
   : _table(1, 1)
 {
-  for (Integer<Unsigned> k = 1; ; k = k + 1) {
+  for (Integer<Unsigned> k = 1; ; ++k) {
     Integer<Unsigned> candidate = k * _table.back();
 
     if (candidate)
@@ -207,7 +232,7 @@ Factorial<Unsigned>::Factorial()
 template<typename Unsigned>
 Integer<Unsigned> Factorial<Unsigned>::operator()(const Integer<Unsigned>& n) const
 {
-  return n < _table.size() ? _table[n] : Integer<Unsigned>(0);
+  return n.value() < _table.size() ? _table[n.value()] : Integer<Unsigned>(0);
 }
 
 /*!
@@ -228,8 +253,9 @@ namespace std {
 
 template<typename Unsigned>
 struct hash<Chic::Integer<Unsigned>>
-  : hash<Unsigned>
-{};
+{
+  std::size_t operator()(const Chic::Integer<Unsigned>& x) const { return x.value(); }
+};
 
 } // namespace std
 
