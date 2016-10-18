@@ -174,6 +174,59 @@ bool operator<(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
   return x.value() < y.value();
 }
 
+#ifdef __BMI__
+
+inline
+int ctz(unsigned int x)
+{
+  return __builtin_ctz(x);
+}
+
+inline
+int ctz(unsigned long x)
+{
+  return __builtin_ctzl(x);
+}
+
+inline
+int ctz(unsigned long long x)
+{
+  return __builtin_ctzll(x);
+}
+
+template<typename Unsigned>
+Unsigned gcd(Unsigned x, Unsigned y)
+{
+  if (!x) return y;
+
+  int shift = ctz(x|y);
+
+  x >>= ctz(x);
+
+  while (y) {
+    y >>= ctz(y);
+    if (x > y) std::swap(x, y);
+    y -= x;
+  }
+
+  return x << shift;
+}
+
+#else // __BMI__
+
+template<typename Unsigned>
+Unsigned gcd(Unsigned x, Unsigned y)
+{
+  while (y) {
+    x %= y;
+    std::swap(x, y);
+  }
+
+  return x;
+}
+
+#endif // __BMI__
+
 /*!
  * \brief Exact exponentiation
  *
