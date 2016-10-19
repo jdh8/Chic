@@ -301,6 +301,17 @@ Integer<Unsigned> gcd(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
   return detail::gcd(x.value(), y.value());
 }
 
+template<typename Unsigned>
+Integer<Unsigned> rotate(const Integer<Unsigned>& x, int shift)
+{
+  const int digits = std::numeric_limits<Unsigned>::digits;
+  const unsigned int mask = digits - 1;
+
+  static_assert((digits & -digits) == digits, "Digits must be a power of 2 to perform circular shift.");
+
+  return (x.value() << shift) | (x.value() >> (-shift & mask));
+}
+
 } // namespace Chic
 
 namespace std {
