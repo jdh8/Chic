@@ -1,8 +1,10 @@
 #include "Dictionary.hpp"
+#include "Fraction.hpp"
 #include <future>
 #include <iostream>
 #include <cstdint>
 
+#include <unordered_set>
 template<typename Unsigned>
 static std::string find(const Unsigned& target, int digit)
 {
@@ -25,6 +27,10 @@ static void run(const Unsigned& target)
 int main(int argc, char** argv)
 {
   std::ios_base::sync_with_stdio(false);
+
+  Chic::Fraction<std::size_t> a(3), b(7);
+
+  std::cout << std::string(a + b) << std::endl;
 
   if (argc == 2) {
     std::istringstream stream(argv[1]);

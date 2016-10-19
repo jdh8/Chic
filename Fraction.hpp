@@ -49,7 +49,7 @@ class Fraction : Base<Fraction<Unsigned>>
      * Because zero is a valid numerator, its type is Unsigned instead of
      * Integer<Unsigned>.
      */
-    const Unsigned& numerator() { return _num; }
+    const Unsigned& numerator() const { return _num; }
 
     /*!
      * \brief Denominator of the fraction
@@ -57,14 +57,12 @@ class Fraction : Base<Fraction<Unsigned>>
      * Integer<Unsigned> mixes zero with invalid representation.  This makes it
      * a perfect denominator because zero denominator is also invalid.
      */
-    const Integer<Unsigned>& denominator() { return _den; }
+    const Integer<Unsigned>& denominator() const { return _den; }
 
     Fraction inverse() const;
 
     template<typename Character>
     explicit operator std::basic_string<Character>() const;
-
-    operator bool() const { return _num && _den; }
 
     Fraction& operator+=(const Fraction&);
     Fraction& operator-=(const Fraction&);
@@ -83,7 +81,7 @@ Fraction<Unsigned>::Fraction(const Unsigned& numerator, const Unsigned& denomina
   : _num(numerator),
     _den(denominator)
 {
-  if (Unsigned divisor = gcd(numerator, denominator)) {
+  if (Unsigned divisor = detail::gcd(numerator, denominator)) {
     _num /= divisor;
     _den = denominator / divisor;
   }
@@ -166,6 +164,36 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator/=(const Fraction& other)
   return *this *= other.inverse();
 }
 
+template<typename Unsigned>
+bool operator==(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
+{
+  return x.denominator() && y.denominator() && x.numerator() == y.numerator() && x.denominator() == y.denominator();
+}
+
 } // namespace Chic
+
+namespace std {
+
+template<typename Unsigned>
+bool isfinite(const Chic::Fraction<Unsigned>& fraction) { return fraction.denominator(); }
+
+template<typename Unsigned>
+bool isinf(const Chic::Fraction<Unsigned>& fraction) { return fraction.numerator() && !fraction.denominator(); }
+
+template<typename Unsigned>
+bool isnan(const Chic::Fraction<Unsigned>& fraction) { return !(fraction.numerator() || fraction.denominator()); }
+
+template<typename Unsigned>
+struct hash<Chic::Fraction<Unsigned>>
+{
+  std::size_t operator()(const Chic::Fraction<Unsigned>& fraction) const
+  {
+    Chic::Integer<std::size_t> numerator = fraction.numerator();
+
+    return Chic::rotate(numerator, (std::numeric_limits<std::size_t>::digits / 2)) ^ fraction.denominator();
+  }
+};
+
+} // namespace std
 
 #endif // CHIC_FRACTION_HPP
