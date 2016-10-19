@@ -20,6 +20,7 @@
 
 #include "Base.hpp"
 #include <functional>
+#include <limits>
 #include <vector>
 #include <sstream>
 #include <cmath>
@@ -66,7 +67,10 @@ class Integer : Base<Integer<Unsigned>>
 template<typename Unsigned>
 Integer<Unsigned>::Integer(const Unsigned& value)
   : _value(value)
-{}
+{
+  typedef std::numeric_limits<Unsigned> Traits;
+  static_assert(Traits::is_integer && !Traits::is_signed, "The underlying type must be an unsigned integer.");
+}
 
 /*!
  * \brief Construct a repeating number
@@ -161,59 +165,6 @@ bool operator<(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
   return x.value() < y.value();
 }
 
-#ifdef __BMI__
-
-inline
-int ctz(unsigned int x)
-{
-  return __builtin_ctz(x);
-}
-
-inline
-int ctz(unsigned long x)
-{
-  return __builtin_ctzl(x);
-}
-
-inline
-int ctz(unsigned long long x)
-{
-  return __builtin_ctzll(x);
-}
-
-template<typename Unsigned>
-Unsigned gcd(Unsigned x, Unsigned y)
-{
-  if (!x) return y;
-
-  int shift = ctz(x|y);
-
-  x >>= ctz(x);
-
-  while (y) {
-    y >>= ctz(y);
-    if (x > y) std::swap(x, y);
-    y -= x;
-  }
-
-  return x << shift;
-}
-
-#else // __BMI__
-
-template<typename Unsigned>
-Unsigned gcd(Unsigned x, Unsigned y)
-{
-  while (y) {
-    x %= y;
-    std::swap(x, y);
-  }
-
-  return x;
-}
-
-#endif // __BMI__
-
 /*!
  * \brief Exact exponentiation
  *
@@ -287,15 +238,75 @@ Integer<Unsigned> factorial(const Integer<Unsigned>& n)
   return implementation(n);
 }
 
+namespace detail {
+
+#ifdef __BMI__
+
+inline
+int ctz(unsigned int x)
+{
+  return __builtin_ctz(x);
+}
+
+inline
+int ctz(unsigned long x)
+{
+  return __builtin_ctzl(x);
+}
+
+inline
+int ctz(unsigned long long x)
+{
+  return __builtin_ctzll(x);
+}
+
+template<typename Unsigned>
+Unsigned gcd(Unsigned x, Unsigned y)
+{
+  if (!x) return y;
+
+  int shift = ctz(x|y);
+
+  x >>= ctz(x);
+
+  while (y) {
+    y >>= ctz(y);
+    if (x > y) std::swap(x, y);
+    y -= x;
+  }
+
+  return x << shift;
+}
+
+#else // __BMI__
+
+template<typename Unsigned>
+Unsigned gcd(Unsigned x, Unsigned y)
+{
+  while (y) {
+    x %= y;
+    std::swap(x, y);
+  }
+
+  return x;
+}
+
+#endif // __BMI__
+
+} // namespace detail
+
+template<typename Unsigned>
+Integer<Unsigned> gcd(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+{
+  return detail::gcd(x.value(), y.value());
+}
+
 } // namespace Chic
 
 namespace std {
 
 template<typename Unsigned>
-struct hash<Chic::Integer<Unsigned>>
-{
-  std::size_t operator()(const Chic::Integer<Unsigned>& x) const { return x.value(); }
-};
+struct hash<Chic::Integer<Unsigned>> : hash<Unsigned> {};
 
 } // namespace std
 
