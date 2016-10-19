@@ -53,7 +53,9 @@ class Integer : Base<Integer<Unsigned>>
 
     std::string str() const;
 
-    operator bool() const { return _value; }
+    operator const Unsigned&() const { return _value; }
+
+    Integer& validate(bool condition) { _value *= condition; return *this; }
 
     Integer& operator++() { ++_value; return *this; }
     Integer& operator--() { --_value; return *this; }

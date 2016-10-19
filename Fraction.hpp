@@ -38,18 +38,29 @@ class Fraction : Base<Fraction<Unsigned>>
 {
   private:
     Unsigned _num;
-    Unsigned _den;
+    Integer<Unsigned> _den;
 
   public:
     Fraction(const Unsigned& = 0, const Unsigned& = 1);
 
-    void canonicalize();
+    /*!
+     * \brief Numerator of the fraction
+     *
+     * Because zero is a valid numerator, its type is Unsigned instead of
+     * Integer<Unsigned>.
+     */
+    const Unsigned& numerator() { return _num; }
+
+    /*!
+     * \brief Denominator of the fraction
+     *
+     * Integer<Unsigned> mixes zero with invalid representation.  This makes it
+     * a perfect denominator because zero denominator is also invalid.
+     */
+    const Integer<Unsigned>& denominator() { return _den; }
 
     Fraction inverse() const;
 
-    Integer<Unsigned> num() const { return _num; }
-    Integer<Unsigned> den() const { return _den; }
-    
     template<typename Character>
     std::basic_string<Character> str() const;
 
@@ -63,21 +74,21 @@ class Fraction : Base<Fraction<Unsigned>>
     Fraction& operator/=(const Fraction&);
 };
 
+/*!
+ * \brief Construct from a numerator and a denominator
+ *
+ * The fraction is automatically canonicalized, i.e. reduced to the irreducible
+ * form.
+ */
 template<typename Unsigned>
-Fraction<Unsigned>::Fraction(const Unsigned& num, const Unsigned& den)
-  : _num(num),
-    _den(den)
+Fraction<Unsigned>::Fraction(const Unsigned& numerator, const Unsigned& denominator)
+  : _num(numerator),
+    _den(denominator)
 {
-  canonicalize();
-}
-
-template<typename Unsigned>
-void Fraction<Unsigned>::canonicalize()
-{
-  Unsigned divisor = gcd(_num, _den);
-
-  _num /= divisor;
-  _den /= divisor;
+  if (Unsigned divisor = gcd(numerator, denominator)) {
+    _num /= divisor;
+    _den = denominator / divisor;
+  }
 }
 
 template<typename Unsigned>
@@ -96,7 +107,7 @@ template<typename Character>
 std::basic_string<Character> Fraction<Unsigned>::str() const
 {
   std::basic_ostringstream<Character> stream;
-  stream << _num << '/' << _den;
+  stream << _num << '/' << _den.value();
   return stream.str();
 }
 
@@ -109,10 +120,21 @@ std::string Fraction<Unsigned>::str() const
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 {
-  Fraction multiplier(_den, other._den);
+  Fraction c(_den, other._den);
 
-  _num = (num() * multiplier.den() + other.num() * multiplier.num()).value();
-  _den = (den() * multiplier.den()).value();
+  if (_den *= c._den) {
+    Unsigned a = _num * c._den.value();
+    Unsigned b = other._num * c._num;
+
+    _den.validate(a / c._den.value() == _num);
+
+    _num = a + b;
+
+    _den.validate(_num >= a && (!c._num || b / c._num == other._num));
+  }
+  else {
+    _num = 0;
+  }
 
   return *this;
 }
@@ -120,10 +142,14 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
 {
-  Fraction multiplier(_den, other._den);
+  Fraction c(_den, other._den);
+  Unsigned a = _num * c._den.value();
+  Unsigned b = other._num * c._num;
 
-  _num = (num() * multiplier.den() - other.num() * multiplier.num()).value();
-  _den = (den() * multiplier.den()).value();
+  _den *= c._den;
+  _den.validate(a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num));
+
+  _num = (a - b) * bool(_den);
 
   return *this;
 }
@@ -134,8 +160,10 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator*=(const Fraction& other)
   Fraction a(_num, other._den);
   Fraction b(other._num, _den);
 
-  _num = (a.num() * b.num()).value();
-  _den = (a.den() * b.den()).value();
+  _den = a._den * b._den;
+  _num = a._num * b._num * bool(_den);
+
+  _den.validate(!b._num || _num / b._num == a._num);
 
   return *this;
 }
