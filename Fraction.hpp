@@ -62,9 +62,7 @@ class Fraction : Base<Fraction<Unsigned>>
     Fraction inverse() const;
 
     template<typename Character>
-    std::basic_string<Character> str() const;
-
-    std::string str() const;
+    explicit operator std::basic_string<Character>() const;
 
     operator bool() const { return _num && _den; }
 
@@ -104,17 +102,11 @@ Fraction<Unsigned> Fraction<Unsigned>::inverse() const
 
 template<typename Unsigned>
 template<typename Character>
-std::basic_string<Character> Fraction<Unsigned>::str() const
+Fraction<Unsigned>::operator std::basic_string<Character>() const
 {
   std::basic_ostringstream<Character> stream;
   stream << _num << '/' << _den.value();
   return stream.str();
-}
-
-template<typename Unsigned>
-std::string Fraction<Unsigned>::str() const
-{
-  return str<char>();
 }
 
 template<typename Unsigned>

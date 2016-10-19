@@ -89,7 +89,7 @@ std::string Dictionary<Unsigned>::resolve(const Expression<Unsigned>& expr) cons
 
   switch (expr.symbol()) {
     case 0:
-      return first ? first.str() : "";
+      return first ? std::string(first) : "";
     case Expression<Unsigned>::sqrt:
       return "√" + resolve(found->second);
     case '!':

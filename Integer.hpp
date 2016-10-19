@@ -47,13 +47,10 @@ class Integer : Base<Integer<Unsigned>>
     Integer(std::size_t, int);
 
     const Unsigned& value() const { return _value; }
+    operator const Unsigned&() const { return _value; }
 
     template<typename Character>
-    std::basic_string<Character> str() const;
-
-    std::string str() const;
-
-    operator const Unsigned&() const { return _value; }
+    explicit operator std::basic_string<Character>() const;
 
     Integer& validate(bool condition) { _value *= condition; return *this; }
 
@@ -90,17 +87,11 @@ Integer<Unsigned>::Integer(std::size_t repeats, int digit)
 
 template<typename Unsigned>
 template<typename Character>
-std::basic_string<Character> Integer<Unsigned>::str() const
+Integer<Unsigned>::operator std::basic_string<Character>() const
 {
   std::basic_ostringstream<Character> stream;
   stream << _value;
   return stream.str();
-}
-
-template<typename Unsigned>
-std::string Integer<Unsigned>::str() const
-{
-  return str<char>();
 }
 
 /*!
