@@ -116,11 +116,9 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
     Unsigned a = _num * c._den.value();
     Unsigned b = other._num * c._num;
 
-    _den.validate(a / c._den.value() == _num);
-
+    _den *= a / c._den.value() == _num;
     _num = a + b;
-
-    _den.validate(_num >= a && (!c._num || b / c._num == other._num));
+    _den *= _num >= a && (!c._num || b / c._num == other._num);
   }
   else {
     _num = 0;
@@ -137,9 +135,8 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
   Unsigned b = other._num * c._num;
 
   _den *= c._den;
-  _den.validate(a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num));
-
-  _num = (a - b) * bool(_den);
+  _den *= a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num);
+  _num = (a - b) * !!_den;
 
   return *this;
 }
@@ -151,9 +148,8 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator*=(const Fraction& other)
   Fraction b(other._num, _den);
 
   _den = a._den * b._den;
-  _num = a._num * b._num * bool(_den);
-
-  _den.validate(!b._num || _num / b._num == a._num);
+  _num = a._num * b._num * !!_den;
+  _den *= !b._num || _num / b._num == a._num;
 
   return *this;
 }

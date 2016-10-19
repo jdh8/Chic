@@ -53,7 +53,7 @@ class Integer : Base<Integer<Unsigned>>
     template<typename Character>
     explicit operator std::basic_string<Character>() const;
 
-    Integer& validate(bool condition) { _value *= condition; return *this; }
+    Integer& operator*=(bool condition) { _value *= condition; return *this; }
 
     Integer& operator++() { ++_value; return *this; }
     Integer& operator--() { --_value; return *this; }
@@ -154,16 +154,10 @@ Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer& other)
 }
 
 template<typename Unsigned>
-bool operator==(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
-{
-  return x.value() == y.value();
-}
+Integer<Unsigned> operator*(Integer<Unsigned> x, bool condition) { return x *= condition; }
 
 template<typename Unsigned>
-bool operator<(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
-{
-  return x.value() < y.value();
-}
+Integer<Unsigned> operator*(bool condition, Integer<Unsigned> x) { return x *= condition; }
 
 /*!
  * \brief Exact exponentiation
