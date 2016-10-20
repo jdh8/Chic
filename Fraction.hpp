@@ -171,13 +171,22 @@ bool operator==(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
 namespace std {
 
 template<typename Unsigned>
-bool isfinite(const Chic::Fraction<Unsigned>& fraction) { return fraction.denominator(); }
+bool isfinite(const Chic::Fraction<Unsigned>& fraction)
+{
+  return fraction.denominator();
+}
 
 template<typename Unsigned>
-bool isinf(const Chic::Fraction<Unsigned>& fraction) { return fraction.numerator() && !fraction.denominator(); }
+bool isinf(const Chic::Fraction<Unsigned>& fraction)
+{
+  return fraction.numerator() && !fraction.denominator();
+}
 
 template<typename Unsigned>
-bool isnan(const Chic::Fraction<Unsigned>& fraction) { return !(fraction.numerator() || fraction.denominator()); }
+bool isnan(const Chic::Fraction<Unsigned>& fraction)
+{
+  return !(fraction.numerator() || fraction.denominator());
+}
 
 template<typename Unsigned>
 struct hash<Chic::Fraction<Unsigned>>

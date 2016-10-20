@@ -154,10 +154,16 @@ Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer& other)
 }
 
 template<typename Unsigned>
-Integer<Unsigned> operator*(Integer<Unsigned> x, bool condition) { return x *= condition; }
+Integer<Unsigned> operator*(Integer<Unsigned> x, bool condition)
+{
+  return x *= condition;
+}
 
 template<typename Unsigned>
-Integer<Unsigned> operator*(bool condition, Integer<Unsigned> x) { return x *= condition; }
+Integer<Unsigned> operator*(bool condition, Integer<Unsigned> x)
+{
+  return x *= condition;
+}
 
 /*!
  * \brief Exact exponentiation
