@@ -48,7 +48,8 @@ class Integer : Base<Integer<Unsigned>>
     Integer(std::size_t, int);
 
     const Unsigned& value() const { return _value; }
-    operator const Unsigned&() const { return _value; }
+
+    explicit operator bool() const { return _value; }
 
     template<typename Character>
     explicit operator std::basic_string<Character>() const;
@@ -165,6 +166,12 @@ Integer<Unsigned> operator*(bool condition, Integer<Unsigned> x)
   return x *= condition;
 }
 
+template<typename Unsigned>
+bool operator==(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+{
+  return x.value() == y.value();
+}
+
 /*!
  * \brief Exact exponentiation
  *
@@ -192,7 +199,7 @@ template<typename Unsigned>
 Integer<Unsigned> sqrt(const Integer<Unsigned>& x)
 {
   Unsigned result = std::sqrt(x.value());
-  return (result * result == x) * result;
+  return (result * result == x.value()) * result;
 }
 
 template<typename Unsigned>
@@ -317,7 +324,10 @@ Integer<Unsigned> rotate(const Integer<Unsigned>& x, int shift)
 namespace std {
 
 template<typename Unsigned>
-struct hash<Chic::Integer<Unsigned>> : hash<Unsigned> {};
+struct hash<Chic::Integer<Unsigned>>
+{
+  std::size_t operator()(const Chic::Integer<Unsigned>& x) const { return x.value(); }
+};
 
 } // namespace std
 

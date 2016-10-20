@@ -76,7 +76,7 @@ char Expression<Unsigned>::symbol() const
 template<typename Unsigned>
 Expression<Unsigned>::operator bool() const
 {
-  return _first;
+  return !!_first;
 }
 
 } // namespace Chic

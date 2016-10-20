@@ -1,9 +1,9 @@
 #include "Dictionary.hpp"
+#include "Fraction.hpp"
 #include <future>
 #include <iostream>
 #include <cstdint>
 
-#include <unordered_set>
 template<typename Unsigned>
 static std::string find(const Unsigned& target, int digit)
 {
@@ -41,3 +41,11 @@ int main(int argc, char** argv)
       "causes undefined behavior.\n";
   }
 }
+
+#ifndef NDEBUG
+
+// Explicit instatiation here forces compilation, which provides valuable
+// compile time errors if something goes wrong.
+template class Chic::Fraction<std::uint_fast64_t>;
+
+#endif

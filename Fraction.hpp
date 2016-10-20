@@ -61,6 +61,8 @@ class Fraction : Base<Fraction<Unsigned>>
 
     Fraction inverse() const;
 
+    explicit operator bool() const { return _num && _den; }
+
     template<typename Character>
     explicit operator std::basic_string<Character>() const;
 
@@ -92,7 +94,7 @@ Fraction<Unsigned> Fraction<Unsigned>::inverse() const
 {
   Fraction<Unsigned> result;
 
-  result._num = _den;
+  result._num = _den.value();
   result._den = _num;
 
   return result;
@@ -110,7 +112,7 @@ Fraction<Unsigned>::operator std::basic_string<Character>() const
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 {
-  Fraction c(_den, other._den);
+  Fraction c(_den.value(), other._den.value());
 
   if (_den *= c._den) {
     Unsigned a = _num * c._den.value();
@@ -130,7 +132,7 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
 {
-  Fraction c(_den, other._den);
+  Fraction c(_den.value(), other._den.value());
   Unsigned a = _num * c._den.value();
   Unsigned b = other._num * c._num;
 
@@ -144,8 +146,8 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator*=(const Fraction& other)
 {
-  Fraction a(_num, other._den);
-  Fraction b(other._num, _den);
+  Fraction a(_num, other._den.value());
+  Fraction b(other._num, _den.value());
 
   _den = a._den * b._den;
   _num = a._num * b._num * !!_den;
