@@ -175,7 +175,7 @@ namespace std {
 template<typename Unsigned>
 bool isfinite(const Chic::Fraction<Unsigned>& fraction)
 {
-  return fraction.denominator();
+  return !!fraction.denominator();
 }
 
 template<typename Unsigned>
