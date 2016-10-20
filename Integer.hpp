@@ -230,7 +230,7 @@ Factorial<Unsigned>::Factorial()
 template<typename Unsigned>
 Integer<Unsigned> Factorial<Unsigned>::operator()(const Integer<Unsigned>& n) const
 {
-  return n.value() < _table.size() ? _table[n.value()] : Integer<Unsigned>(0);
+  return n.value() < _table.size() ? _table[n.value()] : 0;
 }
 
 /*!
