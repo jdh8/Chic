@@ -18,10 +18,12 @@
 #ifndef CHIC_BASE_HPP
 #define CHIC_BASE_HPP
 
+#include <iostream>
+
 namespace Chic {
 
 template<typename T>
-class Base
+struct Base
 {
   friend bool operator!=(const T& x, const T& y) { return !(x == y); }
   friend bool operator<=(const T& x, const T& y) { return !(y < x); }
@@ -42,7 +44,21 @@ class Base
   friend T operator^(T x, const T& y) { return x ^= y; }
   friend T operator<<(T x, int y) { return x <<= y; }
   friend T operator>>(T x, int y) { return x >>= y; }
+
+  template<typename Character>
+  explicit operator std::basic_string<Character>() const;
 };
+
+template<typename T>
+template<typename Character>
+Base<T>::operator std::basic_string<Character>() const
+{
+  std::basic_ostringstream<Character> stream;
+
+  stream << static_cast<const T&>(*this);
+
+  return stream.str();
+}
 
 } // namespace Chic
 

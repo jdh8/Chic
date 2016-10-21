@@ -34,7 +34,7 @@ namespace Chic {
  * undefined behavior.  Therefore, the underlying type must be unsigned.
  */
 template<typename Unsigned>
-class Fraction : Base<Fraction<Unsigned>>
+class Fraction : public Base<Fraction<Unsigned>>
 {
   private:
     Unsigned _num;
@@ -64,9 +64,6 @@ class Fraction : Base<Fraction<Unsigned>>
     Fraction sqrt() const;
 
     explicit operator bool() const { return _num && _den; }
-
-    template<typename Character>
-    explicit operator std::basic_string<Character>() const;
 
     Fraction& operator+=(const Fraction&);
     Fraction& operator-=(const Fraction&);
@@ -127,25 +124,6 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 }
 
 template<typename Unsigned>
-template<typename Character>
-Fraction<Unsigned>::operator std::basic_string<Character>() const
-{
-  std::basic_ostringstream<Character> stream;
-
-  if (_den) {
-    stream << _num;
-
-    if (_den.value() != 1)
-      stream << '/' << _den.value();
-  }
-  else {
-    stream << (_num ? "inf" : "nan");
-  }
-
-  return stream.str();
-}
-
-template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 {
   Fraction c(_den.value(), other._den.value());
@@ -202,6 +180,22 @@ template<typename Unsigned>
 bool operator==(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
 {
   return x.denominator() && y.denominator() && x.numerator() == y.numerator() && x.denominator() == y.denominator();
+}
+
+template<typename Character, typename Unsigned>
+std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Fraction<Unsigned>& fraction)
+{
+  if (fraction.denominator()) {
+    stream << fraction.numerator();
+
+    if (fraction.denominator().value() != 1)
+      stream << '/' << fraction.denominator().value();
+  }
+  else {
+    stream << (fraction.numerator() ? "inf" : "nan");
+  }
+
+  return stream;
 }
 
 } // namespace Chic

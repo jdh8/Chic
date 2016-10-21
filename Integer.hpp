@@ -38,7 +38,7 @@ namespace Chic {
  * undefined behavior.  Therefore, the underlying type must be unsigned.
  */
 template<typename Unsigned>
-class Integer : Base<Integer<Unsigned>>
+class Integer : public Base<Integer<Unsigned>>
 {
   private:
     Unsigned _value;
@@ -50,9 +50,6 @@ class Integer : Base<Integer<Unsigned>>
     const Unsigned& value() const { return _value; }
 
     explicit operator bool() const { return _value; }
-
-    template<typename Character>
-    explicit operator std::basic_string<Character>() const;
 
     Integer& operator*=(bool condition) { _value *= condition; return *this; }
 
@@ -90,15 +87,6 @@ Integer<Unsigned>::Integer(std::size_t repeats, int digit)
     _value = 10 * _value + digit;
 }
 
-template<typename Unsigned>
-template<typename Character>
-Integer<Unsigned>::operator std::basic_string<Character>() const
-{
-  std::basic_ostringstream<Character> stream;
-  stream << _value;
-  return stream.str();
-}
-
 /*!
  * \brief Exact addition
  *
@@ -127,7 +115,7 @@ Integer<Unsigned>& Integer<Unsigned>::operator-=(const Integer& other)
 }
 
 /*!
- * \brief Exact multiplication 
+ * \brief Exact multiplication
  *
  * Overflow causes inexact result, so then 0 is returned.
  */
@@ -170,6 +158,12 @@ template<typename Unsigned>
 bool operator==(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
   return x.value() == y.value();
+}
+
+template<typename Character, typename Unsigned>
+std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Integer<Unsigned>& integer)
+{
+  return stream << integer.value();
 }
 
 /*!
