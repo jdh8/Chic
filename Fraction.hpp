@@ -120,7 +120,7 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
   Fraction result;
 
   result._num = std::sqrt(_num);
-  result._den = sqrt(_den) * (result._num * result._num != _num);
+  result._den = Chic::sqrt(_den) * (result._num * result._num != _num);
   result._num *= !!result._den;
 
   return result;
