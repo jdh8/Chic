@@ -60,6 +60,8 @@ class Fraction : Base<Fraction<Unsigned>>
     const Integer<Unsigned>& denominator() const { return _den; }
 
     Fraction inverse() const;
+    Fraction square() const;
+    Fraction sqrt() const;
 
     explicit operator bool() const { return _num && _den; }
 
@@ -92,10 +94,34 @@ Fraction<Unsigned>::Fraction(const Unsigned& numerator, const Unsigned& denomina
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::inverse() const
 {
-  Fraction<Unsigned> result;
+  Fraction result;
 
   result._num = _den.value();
   result._den = _num;
+
+  return result;
+}
+
+template<typename Unsigned>
+Fraction<Unsigned> Fraction<Unsigned>::square() const
+{
+  Fraction result;
+
+  result._den = _den * _den;
+  result._num = _num * _num * !!result._den;
+  result._den *= !_num || result._num / _num == _num;;
+
+  return result;
+}
+
+template<typename Unsigned>
+Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
+{
+  Fraction result;
+
+  result._num = std::sqrt(_num);
+  result._den = sqrt(_den) * (result._num * result._num != _num);
+  result._num *= !!result._den;
 
   return result;
 }
