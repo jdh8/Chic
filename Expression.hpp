@@ -22,59 +22,59 @@
 
 namespace Chic {
 
-template<typename Unsigned>
+template<typename Index>
 class Expression
 {
   private:
-    Integer<Unsigned> _first;
-    Integer<Unsigned> _second;
+    Index _first;
+    Index _second;
     char _symbol;
 
   public:
     static const char sqrt = 2;
 
-    Expression(const Integer<Unsigned>& = 0, char = 0);
-    Expression(const Integer<Unsigned>&, const Integer<Unsigned>&, char);
+    Expression(const Index& = {}, char = 0);
+    Expression(const Index&, const Index&, char);
 
-    const Integer<Unsigned>& first() const;
-    const Integer<Unsigned>& second() const;
+    const Index& first() const;
+    const Index& second() const;
     char symbol() const;
     operator bool() const;
 };
 
-template<typename Unsigned>
-Expression<Unsigned>::Expression(const Integer<Unsigned>& first, char symbol)
+template<typename Index>
+Expression<Index>::Expression(const Index& first, char symbol)
   : _first(first),
     _symbol(symbol)
 {}
 
-template<typename Unsigned>
-Expression<Unsigned>::Expression(const Integer<Unsigned>& first, const Integer<Unsigned>& second, char symbol)
+template<typename Index>
+Expression<Index>::Expression(const Index& first, const Index& second, char symbol)
   : _first(first),
     _second(second),
     _symbol(symbol)
 {}
 
-template<typename Unsigned>
-const Integer<Unsigned>& Expression<Unsigned>::first() const
+template<typename Index>
+const Index& Expression<Index>::first() const
 {
   return _first;
 }
 
-template<typename Unsigned>
-const Integer<Unsigned>& Expression<Unsigned>::second() const
+template<typename Index>
+const Index& Expression<Index>::second() const
 {
   return _second;
 }
 
-template<typename Unsigned>
-char Expression<Unsigned>::symbol() const
+template<typename Index>
+char Expression<Index>::symbol() const
 {
   return _symbol;
 }
 
-template<typename Unsigned>
-Expression<Unsigned>::operator bool() const
+template<typename Index>
+Expression<Index>::operator bool() const
 {
   return !!_first;
 }

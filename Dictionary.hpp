@@ -27,11 +27,11 @@ template<typename Unsigned>
 class Dictionary
 {
   private:
-    std::unordered_map<Integer<Unsigned>, Expression<Unsigned>> _graph;
+    std::unordered_map<Integer<Unsigned>, Expression<Integer<Unsigned>>> _graph;
     std::vector<std::vector<Integer<Unsigned>>> _hierarchy;
     const int _digit;
 
-    void emplace(const Integer<Unsigned>&, const Expression<Unsigned>&);
+    void emplace(const Integer<Unsigned>&, const Expression<Integer<Unsigned>>&);
     void binary(const Integer<Unsigned>&, const Integer<Unsigned>&);
 
     template<typename Function>
@@ -40,14 +40,14 @@ class Dictionary
   public:
     Dictionary(int);
 
-    const Expression<Unsigned>& operator[](const Integer<Unsigned>&) const;
-    const std::unordered_map<Integer<Unsigned>, Expression<Unsigned>>& graph() const;
+    const Expression<Integer<Unsigned>>& operator[](const Integer<Unsigned>&) const;
+    const std::unordered_map<Integer<Unsigned>, Expression<Integer<Unsigned>>>& graph() const;
     const std::vector<std::vector<Integer<Unsigned>>>& hierarchy() const;
     int digit() const;
-    std::string resolve(const Expression<Unsigned>&) const;
+    std::string resolve(const Expression<Integer<Unsigned>>&) const;
 
     void grow();
-    const Expression<Unsigned>& build(const Integer<Unsigned>&);
+    const Expression<Integer<Unsigned>>& build(const Integer<Unsigned>&);
 };
 
 template<typename Unsigned>
@@ -56,15 +56,15 @@ Dictionary<Unsigned>::Dictionary(int digit)
 {}
 
 template<typename Unsigned>
-const Expression<Unsigned>& Dictionary<Unsigned>::operator[](const Integer<Unsigned>& key) const
+const Expression<Integer<Unsigned>>& Dictionary<Unsigned>::operator[](const Integer<Unsigned>& key) const
 {
-  static const Expression<Unsigned> empty;
+  static const Expression<Integer<Unsigned>> empty;
   auto found = _graph.find(key);
   return found == _graph.end() ? empty : found->second;
 }
 
 template<typename Unsigned>
-const std::unordered_map<Integer<Unsigned>, Expression<Unsigned>>& Dictionary<Unsigned>::graph() const
+const std::unordered_map<Integer<Unsigned>, Expression<Integer<Unsigned>>>& Dictionary<Unsigned>::graph() const
 {
   return _graph;
 }
@@ -82,7 +82,7 @@ int Dictionary<Unsigned>::digit() const
 }
 
 template<typename Unsigned>
-std::string Dictionary<Unsigned>::resolve(const Expression<Unsigned>& expr) const
+std::string Dictionary<Unsigned>::resolve(const Expression<Integer<Unsigned>>& expr) const
 {
   const auto& first = expr.first();
   auto found = _graph.find(first);
@@ -90,7 +90,7 @@ std::string Dictionary<Unsigned>::resolve(const Expression<Unsigned>& expr) cons
   switch (expr.symbol()) {
     case 0:
       return first ? std::string(first) : "";
-    case Expression<Unsigned>::sqrt:
+    case Expression<Integer<Unsigned>>::sqrt:
       return "√" + resolve(found->second);
     case '!':
       return resolve(found->second) + '!';
@@ -99,7 +99,7 @@ std::string Dictionary<Unsigned>::resolve(const Expression<Unsigned>& expr) cons
 }
 
 template<typename Unsigned>
-void Dictionary<Unsigned>::emplace(const Integer<Unsigned>& key, const Expression<Unsigned>& expr)
+void Dictionary<Unsigned>::emplace(const Integer<Unsigned>& key, const Expression<Integer<Unsigned>>& expr)
 {
   if (key && _graph.emplace(key, expr).second)
     _hierarchy.back().emplace_back(key);
@@ -128,7 +128,7 @@ void Dictionary<Unsigned>::unary(const Function& function, char symbol, const Un
 
   for (auto x: destination)
     for (auto y = function(x); y.value() > thresh; y = function(y))
-      if (_graph.emplace(y, Expression<Unsigned>(x, symbol)).second)
+      if (_graph.emplace(y, Expression<Integer<Unsigned>>(x, symbol)).second)
         source.emplace_back(x = y);
 
   destination.insert(destination.end(), source.begin(), source.end());
@@ -151,12 +151,12 @@ void Dictionary<Unsigned>::grow()
       for (const auto& y: base[size - length])
         binary(x, y);
 
-  unary(sqrt<Unsigned>, Expression<Unsigned>::sqrt, 1);
+  unary(sqrt<Unsigned>, Expression<Integer<Unsigned>>::sqrt, 1);
   unary(factorial<Unsigned>, '!', 2);
 }
 
 template<typename Unsigned>
-const Expression<Unsigned>& Dictionary<Unsigned>::build(const Integer<Unsigned>& key)
+const Expression<Integer<Unsigned>>& Dictionary<Unsigned>::build(const Integer<Unsigned>& key)
 {
   while (true) {
     if (const auto& found = operator[](key))
