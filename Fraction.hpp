@@ -109,7 +109,7 @@ Fraction<Unsigned> Fraction<Unsigned>::square() const
 
   result._den = _den * _den;
   result._num = _num * _num * !!result._den;
-  result._den *= !_num || result._num / _num == _num;;
+  result._den *= !_num || result._num / _num == _num;
 
   return result;
 }
