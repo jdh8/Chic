@@ -131,7 +131,17 @@ template<typename Character>
 Fraction<Unsigned>::operator std::basic_string<Character>() const
 {
   std::basic_ostringstream<Character> stream;
-  stream << _num << '/' << _den.value();
+
+  if (_den) {
+    stream << _num;
+
+    if (_den.value() != 1)
+      stream << '/' << _den.value();
+  }
+  else {
+    stream << (_num ? "inf" : "nan");
+  }
+
   return stream.str();
 }
 
