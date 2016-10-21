@@ -7,7 +7,7 @@
 template<typename Unsigned>
 static std::string find(const Unsigned& target, int digit)
 {
-  Chic::Dictionary<Unsigned> dictionary(digit);
+  Chic::Dictionary<Chic::Integer<Unsigned>> dictionary(digit);
   return dictionary.resolve(dictionary.build(target));
 }
 

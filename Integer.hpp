@@ -160,6 +160,12 @@ bool operator==(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
   return x.value() == y.value();
 }
 
+template<typename Unsigned>
+bool operator<(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+{
+  return x.value() < y.value();
+}
+
 template<typename Character, typename Unsigned>
 std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Integer<Unsigned>& integer)
 {

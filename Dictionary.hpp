@@ -23,66 +23,66 @@
 
 namespace Chic {
 
-template<typename Unsigned>
+template<typename Number>
 class Dictionary
 {
   private:
-    std::unordered_map<Integer<Unsigned>, Expression<Integer<Unsigned>>> _graph;
-    std::vector<std::vector<Integer<Unsigned>>> _hierarchy;
+    std::unordered_map<Number, Expression<Number>> _graph;
+    std::vector<std::vector<Number>> _hierarchy;
     const int _digit;
 
-    void emplace(const Integer<Unsigned>&, const Expression<Integer<Unsigned>>&);
-    void binary(const Integer<Unsigned>&, const Integer<Unsigned>&);
+    void emplace(const Number&, const Expression<Number>&);
+    void binary(const Number&, const Number&);
 
     template<typename Function>
-    void unary(const Function&, char, const Unsigned&);
+    void unary(const Function&, char, const Number&);
 
   public:
     Dictionary(int);
 
-    const Expression<Integer<Unsigned>>& operator[](const Integer<Unsigned>&) const;
-    const std::unordered_map<Integer<Unsigned>, Expression<Integer<Unsigned>>>& graph() const;
-    const std::vector<std::vector<Integer<Unsigned>>>& hierarchy() const;
+    const Expression<Number>& operator[](const Number&) const;
+    const std::unordered_map<Number, Expression<Number>>& graph() const;
+    const std::vector<std::vector<Number>>& hierarchy() const;
     int digit() const;
-    std::string resolve(const Expression<Integer<Unsigned>>&) const;
+    std::string resolve(const Expression<Number>&) const;
 
     void grow();
-    const Expression<Integer<Unsigned>>& build(const Integer<Unsigned>&);
+    const Expression<Number>& build(const Number&);
 };
 
-template<typename Unsigned>
-Dictionary<Unsigned>::Dictionary(int digit)
+template<typename Number>
+Dictionary<Number>::Dictionary(int digit)
   : _digit(digit)
 {}
 
-template<typename Unsigned>
-const Expression<Integer<Unsigned>>& Dictionary<Unsigned>::operator[](const Integer<Unsigned>& key) const
+template<typename Number>
+const Expression<Number>& Dictionary<Number>::operator[](const Number& key) const
 {
-  static const Expression<Integer<Unsigned>> empty;
+  static const Expression<Number> empty;
   auto found = _graph.find(key);
   return found == _graph.end() ? empty : found->second;
 }
 
-template<typename Unsigned>
-const std::unordered_map<Integer<Unsigned>, Expression<Integer<Unsigned>>>& Dictionary<Unsigned>::graph() const
+template<typename Number>
+const std::unordered_map<Number, Expression<Number>>& Dictionary<Number>::graph() const
 {
   return _graph;
 }
 
-template<typename Unsigned>
-const std::vector<std::vector<Integer<Unsigned>>>& Dictionary<Unsigned>::hierarchy() const
+template<typename Number>
+const std::vector<std::vector<Number>>& Dictionary<Number>::hierarchy() const
 {
   return _hierarchy;
 }
 
-template<typename Unsigned>
-int Dictionary<Unsigned>::digit() const
+template<typename Number>
+int Dictionary<Number>::digit() const
 {
   return _digit;
 }
 
-template<typename Unsigned>
-std::string Dictionary<Unsigned>::resolve(const Expression<Integer<Unsigned>>& expr) const
+template<typename Number>
+std::string Dictionary<Number>::resolve(const Expression<Number>& expr) const
 {
   const auto& first = expr.first();
   auto found = _graph.find(first);
@@ -90,7 +90,7 @@ std::string Dictionary<Unsigned>::resolve(const Expression<Integer<Unsigned>>& e
   switch (expr.symbol()) {
     case 0:
       return first ? std::string(first) : "";
-    case Expression<Integer<Unsigned>>::sqrt:
+    case Expression<Number>::sqrt:
       return "√" + resolve(found->second);
     case '!':
       return resolve(found->second) + '!';
@@ -98,15 +98,15 @@ std::string Dictionary<Unsigned>::resolve(const Expression<Integer<Unsigned>>& e
   return '(' + resolve(found->second) + ' ' + expr.symbol() + ' ' + resolve(_graph.find(expr.second())->second) + ')';
 }
 
-template<typename Unsigned>
-void Dictionary<Unsigned>::emplace(const Integer<Unsigned>& key, const Expression<Integer<Unsigned>>& expr)
+template<typename Number>
+void Dictionary<Number>::emplace(const Number& key, const Expression<Number>& expr)
 {
   if (key && _graph.emplace(key, expr).second)
     _hierarchy.back().emplace_back(key);
 }
 
-template<typename Unsigned>
-void Dictionary<Unsigned>::binary(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+template<typename Number>
+void Dictionary<Number>::binary(const Number& x, const Number& y)
 {
   emplace(x + y, { x, y, '+' });
   emplace(x * y, { x, y, '*' });
@@ -119,29 +119,34 @@ void Dictionary<Unsigned>::binary(const Integer<Unsigned>& x, const Integer<Unsi
   emplace(y / x, { y, x, '/' });
 }
 
-template<typename Unsigned>
+template<typename Number>
 template<typename Function>
-void Dictionary<Unsigned>::unary(const Function& function, char symbol, const Unsigned& thresh)
+void Dictionary<Number>::unary(const Function& function, char symbol, const Number& thresh)
 {
   auto& destination = _hierarchy.back();
-  std::vector<Integer<Unsigned>> source;
+  std::vector<Number> source;
 
   for (auto x: destination)
-    for (auto y = function(x); y.value() > thresh; y = function(y))
-      if (_graph.emplace(y, Expression<Integer<Unsigned>>(x, symbol)).second)
+    for (auto y = function(x); y > thresh; y = function(y))
+      if (_graph.emplace(y, Expression<Number>(x, symbol)).second)
         source.emplace_back(x = y);
 
   destination.insert(destination.end(), source.begin(), source.end());
 }
 
-template<typename Unsigned>
-void Dictionary<Unsigned>::grow()
+template<typename Number>
+void Dictionary<Number>::grow()
 {
+  typedef Number Function(const Number&);
+
+  const Function* psqrt = sqrt;
+  const Function* pfact = factorial;
+
   _hierarchy.emplace_back();
 
   const auto* base = _hierarchy.data() - 1;
   auto size = _hierarchy.size();
-  Integer<Unsigned> root(size, _digit);
+  Number root(size, _digit);
 
   _graph[root] = root;
   _hierarchy.back().push_back(root);
@@ -151,12 +156,12 @@ void Dictionary<Unsigned>::grow()
       for (const auto& y: base[size - length])
         binary(x, y);
 
-  unary(sqrt<Unsigned>, Expression<Integer<Unsigned>>::sqrt, 1);
-  unary(factorial<Unsigned>, '!', 2);
+  unary(psqrt, Expression<Number>::sqrt, 1);
+  unary(pfact, '!', 2);
 }
 
-template<typename Unsigned>
-const Expression<Integer<Unsigned>>& Dictionary<Unsigned>::build(const Integer<Unsigned>& key)
+template<typename Number>
+const Expression<Number>& Dictionary<Number>::build(const Number& key)
 {
   while (true) {
     if (const auto& found = operator[](key))
