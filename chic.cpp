@@ -41,11 +41,3 @@ int main(int argc, char** argv)
       "causes undefined behavior.\n";
   }
 }
-
-#ifndef NDEBUG
-
-// Explicit instatiation here forces compilation, which provides valuable
-// compile time errors if something goes wrong.
-template class Chic::Fraction<std::uint_fast64_t>;
-
-#endif
