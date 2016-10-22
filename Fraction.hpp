@@ -74,6 +74,9 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
 
     explicit operator bool() const { return _num && _den; }
 
+    Fraction& operator++() { _num += _den.value(); return *this; }
+    Fraction& operator--() { _num -= _den.value(); return *this; }
+
     Fraction& operator+=(const Fraction&);
     Fraction& operator-=(const Fraction&);
     Fraction& operator*=(const Fraction&);
