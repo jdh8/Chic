@@ -28,28 +28,26 @@ class Expression
   private:
     Index _first;
     Index _second;
-    char _symbol;
+    signed char _symbol;
 
   public:
-    static const char sqrt = 2;
-
-    Expression(const Index& = {}, char = 0);
-    Expression(const Index&, const Index&, char);
+    Expression(const Index& = {}, signed char = 0);
+    Expression(const Index&, const Index&, signed char);
 
     const Index& first() const;
     const Index& second() const;
-    char symbol() const;
+    signed char symbol() const;
     operator bool() const;
 };
 
 template<typename Index>
-Expression<Index>::Expression(const Index& first, char symbol)
+Expression<Index>::Expression(const Index& first, signed char symbol)
   : _first(first),
     _symbol(symbol)
 {}
 
 template<typename Index>
-Expression<Index>::Expression(const Index& first, const Index& second, char symbol)
+Expression<Index>::Expression(const Index& first, const Index& second, signed char symbol)
   : _first(first),
     _second(second),
     _symbol(symbol)
@@ -68,7 +66,7 @@ const Index& Expression<Index>::second() const
 }
 
 template<typename Index>
-char Expression<Index>::symbol() const
+signed char Expression<Index>::symbol() const
 {
   return _symbol;
 }
@@ -82,11 +80,14 @@ Expression<Index>::operator bool() const
 template<typename Character, typename Index>
 std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Expression<Index>& expr)
 {
-  if (expr.second()) {
-    return stream << expr.first() << ' ' << expr.symbol() << ' ' << expr.second();
+  if (expr.second()) switch (expr.symbol()) {
+    case -'^':
+      return stream << expr.first() << " ^-" << expr.second();
+    default:
+      return stream << expr.first() << ' ' << expr.symbol() << ' ' << expr.second();
   }
   else switch (expr.symbol()) {
-    case Expression<Index>::sqrt:
+    case 's':
       return stream << "√" << expr.first();
     case '!':
       return stream << expr.first() << '!';

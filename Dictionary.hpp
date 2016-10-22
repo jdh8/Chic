@@ -25,6 +25,9 @@
 
 namespace Chic {
 
+template<typename>
+class Integer;
+
 template<typename Number>
 class Dictionary
 {
@@ -36,8 +39,21 @@ class Dictionary
     const int _digit;
 
     void emplace(Number, Expression<Number>);
+    void factorial();
+
+    template<typename Unsigned>
+    void divides(const Integer<Unsigned>&, const Integer<Unsigned>&);
+
+    template<typename Default>
+    void divides(const Default&, const Default&);
+
+    template<typename Unsigned>
+    void pow(const Integer<Unsigned>&, const Integer<Unsigned>&);
+
+    template<typename Default>
+    void pow(const Default&, const Default&);
+
     void binary(const Number&, const Number&);
-    void unary();
 
   public:
     Dictionary(int);
@@ -89,27 +105,13 @@ void Dictionary<Number>::emplace(Number key, Expression<Number> expr)
   while (key && _graph.emplace(key, expr).second) {
     _hierarchy.back().emplace_back(key);
 
-    expr = { key, 2 };
+    expr = { key, 's' };
     key = key.sqrt();
   }
 }
 
 template<typename Number>
-void Dictionary<Number>::binary(const Number& x, const Number& y)
-{
-  emplace(x + y, { x, y, '+' });
-  emplace(x * y, { x, y, '*' });
-  emplace(x.pow(y), { x, y, '^' });
-  emplace(y.pow(x), { y, x, '^' });
-
-  emplace(x - y, { x, y, '-' });
-  emplace(y - x, { y, x, '-' });
-  emplace(x / y, { x, y, '/' });
-  emplace(y / x, { y, x, '/' });
-}
-
-template<typename Number>
-void Dictionary<Number>::unary()
+void Dictionary<Number>::factorial()
 {
   auto& destination = _hierarchy.back();
   std::size_t length = destination.size();
@@ -128,6 +130,60 @@ void Dictionary<Number>::unary()
 }
 
 template<typename Number>
+template<typename Unsigned>
+void Dictionary<Number>::divides(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+{
+  emplace(x / y, { x, y, '/' });
+  emplace(y / x, { y, x, '/' });
+}
+
+template<typename Number>
+template<typename Default>
+void Dictionary<Number>::divides(const Default& x, const Default& y)
+{
+  Default quotient = x / y;
+
+  emplace(quotient, { x, y, '/' });
+  emplace(quotient.inverse(), { y, x, '/' });
+}
+
+template<typename Number>
+template<typename Unsigned>
+void Dictionary<Number>::pow(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+{
+  emplace(x.pow(y), { x, y, '^' });
+  emplace(y.pow(x), { y, x, '^' });
+}
+
+template<typename Number>
+template<typename Default>
+void Dictionary<Number>::pow(const Default& x, const Default& y)
+{
+  Default cache = x.pow(y);
+
+  emplace(cache, { x, y, '^' });
+  emplace(cache.inverse(), { x, y, -'^' });
+
+  cache = y.pow(x);
+
+  emplace(cache, { y, x, '^' });
+  emplace(cache.inverse(), { y, x, -'^' });
+}
+
+template<typename Number>
+void Dictionary<Number>::binary(const Number& x, const Number& y)
+{
+  emplace(x + y, { x, y, '+' });
+  emplace(x * y, { x, y, '*' });
+
+  emplace(x - y, { x, y, '-' });
+  emplace(y - x, { y, x, '-' });
+
+  divides(x, y);
+  pow(x, y);
+}
+
+template<typename Number>
 void Dictionary<Number>::grow()
 {
   _hierarchy.emplace_back();
@@ -143,7 +199,7 @@ void Dictionary<Number>::grow()
       for (const auto& y: base[size - length])
         binary(x, y);
 
-  unary();
+  factorial();
 }
 
 template<typename Number>

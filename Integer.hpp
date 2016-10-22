@@ -189,8 +189,8 @@ Integer<Unsigned> Integer<Unsigned>::pow(const Integer<Unsigned>& y) const
 
   for (Unsigned exponent = y.value(); exponent; exponent >>= 1) {
     if (exponent & 1)
-      result = result * base;
-    base = base * base;
+      result *= base;
+    base *= base;
   }
   return result;
 }
