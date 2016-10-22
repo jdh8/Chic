@@ -60,6 +60,10 @@ class Integer : public Arithmetic<Integer<Unsigned>>
     Integer& operator-=(const Integer&);
     Integer& operator*=(const Integer&);
     Integer& operator/=(const Integer&);
+
+    Integer pow(const Integer&) const;
+    Integer sqrt() const;
+    Integer factorial() const;
 };
 
 template<typename Unsigned>
@@ -178,9 +182,10 @@ std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream,
  * Overflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> pow(Integer<Unsigned> base, const Integer<Unsigned>& y)
+Integer<Unsigned> Integer<Unsigned>::pow(const Integer<Unsigned>& y) const
 {
-  Integer<Unsigned> result = 1;
+  Integer base = *this;
+  Integer result = 1;
 
   for (Unsigned exponent = y.value(); exponent; exponent >>= 1) {
     if (exponent & 1)
@@ -196,10 +201,10 @@ Integer<Unsigned> pow(Integer<Unsigned> base, const Integer<Unsigned>& y)
  * If the argument is no perfect square, 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> sqrt(const Integer<Unsigned>& x)
+Integer<Unsigned> Integer<Unsigned>::sqrt() const
 {
-  Unsigned result = std::sqrt(x.value());
-  return (result * result == x.value()) * result;
+  Unsigned result = std::sqrt(value());
+  return (result * result == value()) * result;
 }
 
 template<typename Unsigned>
@@ -239,10 +244,10 @@ Integer<Unsigned> Factorial<Unsigned>::operator()(const Integer<Unsigned>& n) co
  * Overflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> factorial(const Integer<Unsigned>& n)
+Integer<Unsigned> Integer<Unsigned>::factorial() const
 {
   static const Factorial<Unsigned> implementation;
-  return implementation(n);
+  return implementation(*this);
 }
 
 namespace detail {

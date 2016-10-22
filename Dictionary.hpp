@@ -20,8 +20,8 @@
 
 #include "Expression.hpp"
 #include "IO.hpp"
-#include "Fraction.hpp"
 #include <unordered_map>
+#include <vector>
 
 namespace Chic {
 
@@ -90,7 +90,7 @@ void Dictionary<Number>::emplace(Number key, Expression<Number> expr)
     _hierarchy.back().emplace_back(key);
 
     expr = { key, 2 };
-    key = sqrt(key);
+    key = key.sqrt();
   }
 }
 
@@ -99,8 +99,8 @@ void Dictionary<Number>::binary(const Number& x, const Number& y)
 {
   emplace(x + y, { x, y, '+' });
   emplace(x * y, { x, y, '*' });
-  emplace(pow(x, y), { x, y, '^' });
-  emplace(pow(y, x), { y, x, '^' });
+  emplace(x.pow(y), { x, y, '^' });
+  emplace(y.pow(x), { y, x, '^' });
 
   emplace(x - y, { x, y, '-' });
   emplace(y - x, { y, x, '-' });
@@ -116,13 +116,13 @@ void Dictionary<Number>::unary()
 
   for (std::size_t k = 0; k < length; ++k) {
     auto x = destination[k];
-    auto y = factorial(x);
+    auto y = x.factorial();
 
     // Due to Bertrand's postulate, from 2! on, factorials cannot be a perfect square.
     while (y > 2 && _graph.emplace(y, Expression<Number>(x, '!')).second) {
       destination.emplace_back(y);
       x = y;
-      y = factorial(y);
+      y = y.factorial();
     }
   }
 }
