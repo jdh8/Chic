@@ -18,7 +18,7 @@
 #ifndef CHIC_ARITHMETIC_HPP
 #define CHIC_ARITHMETIC_HPP
 
-#include <iostream>
+#include <iosfwd>
 
 namespace Chic {
 
