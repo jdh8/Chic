@@ -19,6 +19,8 @@
 #define CHIC_DICTIONARY_HPP
 
 #include "Expression.hpp"
+#include "IO.hpp"
+#include "Fraction.hpp"
 #include <unordered_map>
 
 namespace Chic {
@@ -27,6 +29,8 @@ template<typename Number>
 class Dictionary
 {
   private:
+    class Resolver;
+
     std::unordered_map<Number, Expression<Number>> _graph;
     std::vector<std::vector<Number>> _hierarchy;
     const int _digit;
@@ -44,7 +48,7 @@ class Dictionary
     const std::unordered_map<Number, Expression<Number>>& graph() const;
     const std::vector<std::vector<Number>>& hierarchy() const;
     int digit() const;
-    std::string resolve(const Expression<Number>&) const;
+    Resolver resolve(const Number&) const;
 
     void grow();
     const Expression<Number>& build(const Number&);
@@ -79,23 +83,6 @@ template<typename Number>
 int Dictionary<Number>::digit() const
 {
   return _digit;
-}
-
-template<typename Number>
-std::string Dictionary<Number>::resolve(const Expression<Number>& expr) const
-{
-  const auto& first = expr.first();
-  auto found = _graph.find(first);
-
-  switch (expr.symbol()) {
-    case 0:
-      return first ? std::string(first) : "";
-    case Expression<Number>::sqrt:
-      return "√" + resolve(found->second);
-    case '!':
-      return resolve(found->second) + '!';
-  }
-  return '(' + resolve(found->second) + ' ' + expr.symbol() + ' ' + resolve(_graph.find(expr.second())->second) + ')';
 }
 
 template<typename Number>
@@ -168,6 +155,48 @@ const Expression<Number>& Dictionary<Number>::build(const Number& key)
       return found;
     grow();
   }
+}
+
+template<typename Number>
+typename Dictionary<Number>::Resolver Dictionary<Number>::resolve(const Number& key) const
+{
+  return { *this, key };
+}
+
+template<typename Number>
+class Dictionary<Number>::Resolver : public IO<Dictionary<Number>::Resolver>
+{
+  private:
+    const Dictionary& _dict;
+    const Number& _key;
+
+  public:
+    Resolver(const Dictionary&, const Number&);
+
+    template<typename Character>
+    std::basic_ostream<Character>& operator()(std::basic_ostream<Character>&) const;
+};
+
+template<typename Number>
+Dictionary<Number>::Resolver::Resolver(const Dictionary& dict, const Number& key)
+  : _dict(dict),
+    _key(key)
+{}
+
+template<typename Number>
+template<typename Character>
+std::basic_ostream<Character>& Dictionary<Number>::Resolver::operator()(std::basic_ostream<Character>& stream) const
+{
+  const auto& expr = _dict[_key];
+
+  if (expr.symbol()) {
+    stream << _key << " = " << expr << '\n' << Resolver(_dict, expr.first());
+
+    if (expr.second())
+      stream << Resolver(_dict, expr.second());
+  }
+
+  return stream;
 }
 
 } // namespace Chic
