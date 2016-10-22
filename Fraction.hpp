@@ -34,7 +34,7 @@ namespace Chic {
  * undefined behavior.  Therefore, the underlying type must be unsigned.
  */
 template<typename Unsigned>
-class Fraction : public Base<Fraction<Unsigned>>
+class Fraction : public Arithmetic<Fraction<Unsigned>>
 {
   private:
     Unsigned _num;

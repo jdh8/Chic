@@ -18,7 +18,7 @@
 #ifndef CHIC_INTEGER_HPP
 #define CHIC_INTEGER_HPP
 
-#include "Base.hpp"
+#include "Arithmetic.hpp"
 #include <functional>
 #include <limits>
 #include <vector>
@@ -38,7 +38,7 @@ namespace Chic {
  * undefined behavior.  Therefore, the underlying type must be unsigned.
  */
 template<typename Unsigned>
-class Integer : public Base<Integer<Unsigned>>
+class Integer : public Arithmetic<Integer<Unsigned>>
 {
   private:
     Unsigned _value;
