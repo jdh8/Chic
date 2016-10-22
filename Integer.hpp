@@ -64,6 +64,7 @@ class Integer : public Arithmetic<Integer<Unsigned>>
     Integer pow(const Integer&) const;
     Integer sqrt() const;
     Integer factorial() const;
+    Integer factorial(const Integer&) const;
 };
 
 template<typename Unsigned>
@@ -182,7 +183,7 @@ std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream,
  * Overflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> Integer<Unsigned>::pow(const Integer<Unsigned>& y) const
+Integer<Unsigned> Integer<Unsigned>::pow(const Integer& y) const
 {
   Integer base = *this;
   Integer result = 1;
@@ -248,6 +249,22 @@ Integer<Unsigned> Integer<Unsigned>::factorial() const
 {
   static const Factorial<Unsigned> implementation;
   return implementation(*this);
+}
+
+/*!
+ * \brief Exact factorial ratio
+ *
+ * Overflow causes inexact result, so then 0 is returned.
+ */
+template<typename Unsigned>
+Integer<Unsigned> Integer<Unsigned>::factorial(const Integer& lesser) const
+{
+  Integer result = *this >= lesser;
+
+  for (Integer multiplier = _value; multiplier > lesser; --multiplier)
+    result *= multiplier;
+
+  return result;
 }
 
 namespace detail {
