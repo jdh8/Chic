@@ -227,7 +227,7 @@ struct hash<Chic::Fraction<Unsigned>>
   {
     Chic::Integer<std::size_t> numerator = fraction.numerator();
 
-    return Chic::rotate(numerator, (std::numeric_limits<std::size_t>::digits / 2)) ^ fraction.denominator();
+    return Chic::rotate(numerator, (std::numeric_limits<std::size_t>::digits / 2)).value() ^ fraction.denominator().value();
   }
 };
 
