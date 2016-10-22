@@ -12,7 +12,9 @@ static std::string find(const Unsigned& target, int digit)
 
   dictionary.build(target);
 
-  stream << dictionary.resolve(target);
+  stream << target << '#' << digit << ": "
+         << dictionary.hierarchy().size() << " digits used\n--------------------\n"
+         << dictionary.resolve(target);
 
   return stream.str();
 }
