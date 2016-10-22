@@ -42,6 +42,7 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
 
   public:
     Fraction(const Unsigned& = 0, const Unsigned& = 1);
+    Fraction(std::size_t, int);
 
     /*!
      * \brief Numerator of the fraction
@@ -62,6 +63,10 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction inverse() const;
     Fraction square() const;
     Fraction sqrt() const;
+    Fraction factorial() const;
+
+    Fraction pow(const Integer<Unsigned>&) const;
+    Fraction pow(const Fraction&) const;
 
     explicit operator bool() const { return _num && _den; }
 
@@ -87,6 +92,12 @@ Fraction<Unsigned>::Fraction(const Unsigned& numerator, const Unsigned& denomina
     _den = denominator / divisor;
   }
 }
+
+template<typename Unsigned>
+Fraction<Unsigned>::Fraction(std::size_t repeat, int digit)
+  : _num(Integer<Unsigned>(repeat, digit).value()),
+    _den(1)
+{}
 
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::inverse() const
@@ -117,10 +128,41 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
   Fraction result;
 
   result._num = std::sqrt(_num);
-  result._den = _den.sqrt() * (result._num * result._num != _num);
+  result._den = _den.sqrt() * (result._num * result._num == _num);
   result._num *= !!result._den;
 
   return result;
+}
+
+template<typename Unsigned>
+Fraction<Unsigned> Fraction<Unsigned>::factorial() const
+{
+  Fraction result;
+
+  result._num = Integer<Unsigned>(_num).factorial().value() * !!_den;
+  result._den = !!result._num;
+
+  return result;
+}
+
+template<typename Unsigned>
+Fraction<Unsigned> Fraction<Unsigned>::pow(const Integer<Unsigned>& y) const
+{
+  Fraction base = *this;
+  Fraction result = 1;
+
+  for (Unsigned exponent = y.value(); exponent; exponent >>= 1) {
+    if (exponent & 1)
+      result = result * base;
+    base = base * base;
+  }
+  return result;
+}
+
+template<typename Unsigned>
+Fraction<Unsigned> Fraction<Unsigned>::pow(const Fraction& exponent) const
+{
+  return exponent.denominator().value() == 1 ? pow(Integer<Unsigned>(exponent.numerator())) : Fraction(0, 0);
 }
 
 template<typename Unsigned>

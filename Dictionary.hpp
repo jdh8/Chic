@@ -119,7 +119,7 @@ void Dictionary<Number>::unary()
     auto y = x.factorial();
 
     // Due to Bertrand's postulate, from 2! on, factorials cannot be a perfect square.
-    while (y > 2 && _graph.emplace(y, Expression<Number>(x, '!')).second) {
+    while (y && _graph.emplace(y, Expression<Number>(x, '!')).second) {
       destination.emplace_back(y);
       x = y;
       y = y.factorial();

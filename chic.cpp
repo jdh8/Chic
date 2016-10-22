@@ -7,7 +7,7 @@
 template<typename Unsigned>
 static std::string find(const Unsigned& target, int digit)
 {
-  Chic::Dictionary<Chic::Integer<Unsigned>> dictionary(digit);
+  Chic::Dictionary<Chic::Fraction<Unsigned>> dictionary(digit);
   std::ostringstream stream;
 
   dictionary.build(target);
