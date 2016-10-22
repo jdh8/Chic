@@ -41,7 +41,10 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Integer<Unsigned> _den;
 
   public:
-    Fraction(const Unsigned& = 0, const Unsigned& = 1);
+    Fraction() = default;
+    Fraction(const Unsigned&);
+    Fraction(const Unsigned&, const Unsigned&);
+    Fraction(const Integer<Unsigned>&);
     Fraction(std::size_t, int);
 
     /*!
@@ -63,9 +66,10 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction inverse() const;
     Fraction square() const;
     Fraction sqrt() const;
-    Fraction factorial() const;
 
-    Fraction pow(const Integer<Unsigned>&) const;
+    Integer<Unsigned> factorial() const;
+
+    Fraction pow(Unsigned) const;
     Fraction pow(const Fraction&) const;
 
     explicit operator bool() const { return _num && _den; }
@@ -75,6 +79,12 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction& operator*=(const Fraction&);
     Fraction& operator/=(const Fraction&);
 };
+
+template<typename Unsigned>
+Fraction<Unsigned>::Fraction(const Unsigned& value)
+  : _num(value),
+    _den(1)
+{}
 
 /*!
  * \brief Construct from a numerator and a denominator
@@ -92,6 +102,11 @@ Fraction<Unsigned>::Fraction(const Unsigned& numerator, const Unsigned& denomina
     _den = denominator / divisor;
   }
 }
+
+template<typename Unsigned>
+Fraction<Unsigned>::Fraction(const Integer<Unsigned>& integer)
+  : Fraction(integer.value())
+{}
 
 template<typename Unsigned>
 Fraction<Unsigned>::Fraction(std::size_t repeat, int digit)
@@ -135,23 +150,18 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 }
 
 template<typename Unsigned>
-Fraction<Unsigned> Fraction<Unsigned>::factorial() const
+Integer<Unsigned> Fraction<Unsigned>::factorial() const
 {
-  Fraction result;
-
-  result._num = Integer<Unsigned>(_num).factorial().value() * !!_den;
-  result._den = !!result._num;
-
-  return result;
+  return Integer<Unsigned>(_num).factorial();
 }
 
 template<typename Unsigned>
-Fraction<Unsigned> Fraction<Unsigned>::pow(const Integer<Unsigned>& y) const
+Fraction<Unsigned> Fraction<Unsigned>::pow(Unsigned exponent) const
 {
   Fraction base = *this;
   Fraction result = 1;
 
-  for (Unsigned exponent = y.value(); exponent; exponent >>= 1) {
+  for (; exponent; exponent >>= 1) {
     if (exponent & 1)
       result *= base;
     base = base.square();
@@ -162,7 +172,12 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(const Integer<Unsigned>& y) const
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::pow(const Fraction& exponent) const
 {
-  return exponent.denominator().value() == 1 ? pow(Integer<Unsigned>(exponent.numerator())) : Fraction(0, 0);
+  bool valid = exponent.denominator().value() == 1;
+  Fraction result = pow(exponent.numerator() * valid);
+
+  result._num *= valid;
+
+  return result;
 }
 
 template<typename Unsigned>

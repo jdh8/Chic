@@ -189,7 +189,7 @@ void Dictionary<Number>::grow()
   _hierarchy.emplace_back();
 
   const auto* base = _hierarchy.data() - 1;
-  auto size = _hierarchy.size();
+  std::size_t size = _hierarchy.size();
   Number root(size, _digit);
 
   emplace(root, root);
