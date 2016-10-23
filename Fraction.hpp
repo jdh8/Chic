@@ -124,7 +124,7 @@ Fraction<Unsigned> Fraction<Unsigned>::inverse() const
   Fraction result;
 
   result._num = _den.value();
-  result._den = _num;
+  result._den = _num * !!_den;
 
   return result;
 }
