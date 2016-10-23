@@ -121,9 +121,11 @@ Fraction<Unsigned>::Fraction(std::size_t repeat, int digit)
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::apply(const Fraction& other)
 {
-  Unsigned cache = _num * other._num;
+  _den *= other._den;
 
-  _den *= other._den * (!_num || cache / _num == other._num);
+  Unsigned cache = _num * other._num * !!_den;
+
+  _den *= !_num || cache / _num == other._num;
   _num = cache;
 
   return *this;
@@ -147,6 +149,7 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 
   result._num = std::sqrt(_num);
   result._den = _den.sqrt() * (result._num * result._num == _num);
+  result._num *= !!result._den;
 
   return result;
 }
@@ -186,12 +189,7 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(Unsigned exponent) const
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::pow(const Fraction& exponent) const
 {
-  bool valid = exponent.denominator().value() == 1;
-  Fraction result = pow(exponent.numerator() * valid);
-
-  result._den *= valid;
-
-  return result;
+  return exponent.denominator().value() == 1 ? pow(exponent.numerator()) : Fraction(0, 0);
 }
 
 template<typename Unsigned>
@@ -207,6 +205,9 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
     _num = a + b;
     _den *= _num >= a && (!c._num || b / c._num == other._num);
   }
+  else {
+    _num = 0;
+  }
 
   return *this;
 }
@@ -221,7 +222,10 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
     Unsigned b = other._num * c._num;
 
     _den *= a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num);
-    _num = a - b;
+    _num = (a - b) * !!_den;
+  }
+  else {
+    _num = 0;
   }
 
   return *this;
