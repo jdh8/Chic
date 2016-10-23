@@ -199,12 +199,14 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 {
   Fraction c(_den.value(), other._den.value());
 
-  Unsigned a = _num * c._den.value();
-  Unsigned b = other._num * c._num;
+  if (_den *= c._den) {
+    Unsigned a = _num * c._den.value();
+    Unsigned b = other._num * c._num;
 
-  _den *= c._den * (a / c._den.value() == _num);
-  _num = a + b;
-  _den *= _num >= a && (!c._num || b / c._num == other._num);
+    _den *= a / c._den.value() == _num;
+    _num = a + b;
+    _den *= _num >= a && (!c._num || b / c._num == other._num);
+  }
 
   return *this;
 }
@@ -213,11 +215,14 @@ template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
 {
   Fraction c(_den.value(), other._den.value());
-  Unsigned a = _num * c._den.value();
-  Unsigned b = other._num * c._num;
 
-  _den *= c._den * (a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num));
-  _num = a - b;
+  if (_den *= c._den) {
+    Unsigned a = _num * c._den.value();
+    Unsigned b = other._num * c._num;
+
+    _den *= a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num);
+    _num = a - b;
+  }
 
   return *this;
 }
