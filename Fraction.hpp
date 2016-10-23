@@ -39,6 +39,8 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Unsigned _num;
     Integer<Unsigned> _den;
 
+    Fraction& apply(const Fraction&);
+
   public:
     Fraction() = default;
     Fraction(const Unsigned&);
@@ -63,7 +65,6 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     const Integer<Unsigned>& denominator() const { return _den; }
 
     Fraction inverse() const;
-    Fraction square() const;
     Fraction sqrt() const;
 
     Integer<Unsigned> factorial() const;
@@ -118,24 +119,23 @@ Fraction<Unsigned>::Fraction(std::size_t repeat, int digit)
 {}
 
 template<typename Unsigned>
+Fraction<Unsigned>& Fraction<Unsigned>::apply(const Fraction& other)
+{
+  Unsigned cache = _num * other._num;
+
+  _den *= other._den * (!_num || cache / _num == other._num);
+  _num = cache;
+
+  return *this;
+}
+
+template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::inverse() const
 {
   Fraction result;
 
   result._num = _den.value();
   result._den = _num * !!_den;
-
-  return result;
-}
-
-template<typename Unsigned>
-Fraction<Unsigned> Fraction<Unsigned>::square() const
-{
-  Fraction result;
-
-  result._den = _den * _den;
-  result._num = _num * _num;
-  result._den *= !_num || result._num / _num == _num;
 
   return result;
 }
@@ -164,7 +164,7 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial(const Fraction& lesser) const
 
   if (_den == lesser._den && _num >= lesser._num && _den && !((_num - lesser._num) % _den))
     for (Fraction multiplier = *this; _num > lesser._num; --multiplier)
-      result *= multiplier;
+      result.apply(multiplier);
   else
     result._den = 0;
 }
@@ -177,8 +177,8 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(Unsigned exponent) const
 
   for (; exponent; exponent >>= 1) {
     if (exponent & 1)
-      result *= base;
-    base = base.square();
+      result.apply(base);
+    base.apply(base);
   }
   return result;
 }
@@ -228,10 +228,7 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator*=(const Fraction& other)
   Fraction a(_num, other._den.value());
   Fraction b(other._num, _den.value());
 
-  _num = a._num * b._num;
-  _den = a._den * b._den * (!b._num || _num / b._num == a._num);
-
-  return *this;
+  return *this = a.apply(b);
 }
 
 template<typename Unsigned>
