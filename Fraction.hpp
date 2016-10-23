@@ -27,8 +27,7 @@ namespace Chic {
  * \tparam Unsigned  Underlying unsigned type
  *
  * Exact elementary arithmetic, exponentiation, and square root are provided.
- * If an overflow occurs, infinity is returned.  If the result is otherwise
- * not representable, nan is returned.
+ * If the result is not representable, nan is returned.
  *
  * Unsigned integer overflow wraps around, but signed integer overflow causes
  * undefined behavior.  Therefore, the underlying type must be unsigned.
@@ -135,7 +134,7 @@ Fraction<Unsigned> Fraction<Unsigned>::square() const
   Fraction result;
 
   result._den = _den * _den;
-  result._num = _num * _num * !!result._den;
+  result._num = _num * _num;
   result._den *= !_num || result._num / _num == _num;
 
   return result;
@@ -148,7 +147,6 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 
   result._num = std::sqrt(_num);
   result._den = _den.sqrt() * (result._num * result._num == _num);
-  result._num *= !!result._den;
 
   return result;
 }
@@ -168,7 +166,7 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial(const Fraction& lesser) const
     for (Fraction multiplier = *this; _num > lesser._num; --multiplier)
       result *= multiplier;
   else
-    result._den = result._num = 0;
+    result._den = 0;
 }
 
 template<typename Unsigned>
@@ -191,7 +189,7 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(const Fraction& exponent) const
   bool valid = exponent.denominator().value() == 1;
   Fraction result = pow(exponent.numerator() * valid);
 
-  result._num *= valid;
+  result._den *= valid;
 
   return result;
 }
@@ -201,17 +199,12 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 {
   Fraction c(_den.value(), other._den.value());
 
-  if (_den *= c._den) {
-    Unsigned a = _num * c._den.value();
-    Unsigned b = other._num * c._num;
+  Unsigned a = _num * c._den.value();
+  Unsigned b = other._num * c._num;
 
-    _den *= a / c._den.value() == _num;
-    _num = a + b;
-    _den *= _num >= a && (!c._num || b / c._num == other._num);
-  }
-  else {
-    _num = 0;
-  }
+  _den *= c._den * (a / c._den.value() == _num);
+  _num = a + b;
+  _den *= _num >= a && (!c._num || b / c._num == other._num);
 
   return *this;
 }
@@ -223,9 +216,8 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
   Unsigned a = _num * c._den.value();
   Unsigned b = other._num * c._num;
 
-  _den *= c._den;
-  _den *= a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num);
-  _num = (a - b) * !!_den;
+  _den *= c._den * (a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num));
+  _num = a - b;
 
   return *this;
 }
@@ -236,9 +228,8 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator*=(const Fraction& other)
   Fraction a(_num, other._den.value());
   Fraction b(other._num, _den.value());
 
-  _den = a._den * b._den;
-  _num = a._num * b._num * !!_den;
-  _den *= !b._num || _num / b._num == a._num;
+  _num = a._num * b._num;
+  _den = a._den * b._den * (!b._num || _num / b._num == a._num);
 
   return *this;
 }
@@ -252,7 +243,7 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator/=(const Fraction& other)
 template<typename Unsigned>
 bool operator==(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
 {
-  return x.denominator() && y.denominator() && x.numerator() == y.numerator() && x.denominator() == y.denominator();
+  return x.denominator() && x.denominator() == y.denominator() && x.numerator() == y.numerator();
 }
 
 template<typename Character, typename Unsigned>
@@ -274,24 +265,6 @@ std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream,
 } // namespace Chic
 
 namespace std {
-
-template<typename Unsigned>
-bool isfinite(const Chic::Fraction<Unsigned>& fraction)
-{
-  return !!fraction.denominator();
-}
-
-template<typename Unsigned>
-bool isinf(const Chic::Fraction<Unsigned>& fraction)
-{
-  return fraction.numerator() && !fraction.denominator();
-}
-
-template<typename Unsigned>
-bool isnan(const Chic::Fraction<Unsigned>& fraction)
-{
-  return !(fraction.numerator() || fraction.denominator());
-}
 
 template<typename Unsigned>
 struct hash<Chic::Fraction<Unsigned>>
