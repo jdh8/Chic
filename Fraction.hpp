@@ -67,7 +67,7 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction inverse() const;
     Fraction sqrt() const;
 
-    Integer<Unsigned> factorial() const;
+    Fraction factorial() const;
     Fraction factorial(const Fraction&) const;
 
     Fraction pow(Unsigned) const;
@@ -155,9 +155,16 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 }
 
 template<typename Unsigned>
-Integer<Unsigned> Fraction<Unsigned>::factorial() const
+Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 {
-  return Integer<Unsigned>(_num).factorial();
+  Fraction result = Integer<Unsigned>(_num).factorial();
+
+  result._den *= !!result._num;
+
+  if (!result._num)
+    result._num = _den.value() == 1;
+
+  return result;
 }
 
 template<typename Unsigned>
@@ -169,7 +176,9 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial(const Fraction& lesser) const
     for (Fraction multiplier = *this; _num > lesser._num; --multiplier)
       result.apply(multiplier);
   else
-    result._den = 0;
+    result._den = result._num = 0;
+
+  return result;
 }
 
 template<typename Unsigned>
