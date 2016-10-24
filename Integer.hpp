@@ -269,8 +269,6 @@ Integer<Unsigned> Integer<Unsigned>::factorial(const Integer& lesser) const
 
 namespace detail {
 
-#ifdef __BMI__
-
 inline
 int ctz(unsigned int x)
 {
@@ -288,6 +286,8 @@ int ctz(unsigned long long x)
 {
   return __builtin_ctzll(x);
 }
+
+#ifdef __BMI__
 
 template<typename Unsigned>
 Unsigned gcd(Unsigned x, Unsigned y)
