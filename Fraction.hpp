@@ -151,7 +151,7 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 {
   Fraction result;
 
-  result._num = Integer<Unsigned>(_num).factorial().value();
+  result._num = Integer<Unsigned>(_num).factorial();
   result._den = !!result._num;
   result._num |= _den == 1 && !result._num;
 
@@ -277,7 +277,7 @@ struct hash<Chic::Fraction<Unsigned>>
   {
     Chic::Integer<std::size_t> numerator = fraction.numerator();
 
-    return Chic::rotate(numerator, (std::numeric_limits<std::size_t>::digits / 2)).value() ^ fraction.denominator();
+    return Chic::rotate(numerator, (std::numeric_limits<std::size_t>::digits / 2)) ^ fraction.denominator();
   }
 };
 

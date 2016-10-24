@@ -49,7 +49,7 @@ class Integer : public Arithmetic<Integer<Unsigned>>
 
     const Unsigned& value() const { return _value; }
 
-    explicit operator bool() const { return _value; }
+    operator const Unsigned&() const { return _value; }
 
     Integer& operator*=(bool condition) { _value *= condition; return *this; }
 
@@ -61,7 +61,7 @@ class Integer : public Arithmetic<Integer<Unsigned>>
     Integer& operator*=(const Integer&);
     Integer& operator/=(const Integer&);
 
-    Integer pow(const Integer&) const;
+    Integer pow(Unsigned) const;
     Integer sqrt() const;
     Integer factorial() const;
     Integer factorial(const Integer&) const;
@@ -147,28 +147,16 @@ Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer& other)
   return *this;
 }
 
-template<typename Unsigned>
-Integer<Unsigned> operator*(Integer<Unsigned> x, bool condition)
+template<typename Unsigned, typename Other>
+Integer<Unsigned> operator*(Integer<Unsigned> x, const Other& other)
 {
-  return x *= condition;
+  return x *= other;
 }
 
 template<typename Unsigned>
 Integer<Unsigned> operator*(bool condition, Integer<Unsigned> x)
 {
   return x *= condition;
-}
-
-template<typename Unsigned>
-bool operator==(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
-{
-  return x.value() == y.value();
-}
-
-template<typename Unsigned>
-bool operator<(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
-{
-  return x.value() < y.value();
 }
 
 template<typename Character, typename Unsigned>
@@ -183,12 +171,12 @@ std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream,
  * Overflow causes inexact result, so then 0 is returned.
  */
 template<typename Unsigned>
-Integer<Unsigned> Integer<Unsigned>::pow(const Integer& y) const
+Integer<Unsigned> Integer<Unsigned>::pow(Unsigned exponent) const
 {
   Integer base = *this;
   Integer result = 1;
 
-  for (Unsigned exponent = y.value(); exponent; exponent >>= 1) {
+  for (; exponent; exponent >>= 1) {
     if (exponent & 1)
       result *= base;
     base *= base;
@@ -236,7 +224,7 @@ Factorial<Unsigned>::Factorial()
 template<typename Unsigned>
 Integer<Unsigned> Factorial<Unsigned>::operator()(const Integer<Unsigned>& n) const
 {
-  return n.value() < _table.size() ? _table[n.value()] : 0;
+  return n < _table.size() ? _table[n] : Integer<Unsigned>(0);
 }
 
 /*!
@@ -338,7 +326,7 @@ Integer<Unsigned> rotate(const Integer<Unsigned>& x, int shift)
 
   static_assert((digits & -digits) == digits, "Digits must be a power of 2 to perform circular shift.");
 
-  return (x.value() << shift) | (x.value() >> (-shift & mask));
+  return (x << shift) | (x >> (-shift & mask));
 }
 
 } // namespace Chic
@@ -348,7 +336,7 @@ namespace std {
 template<typename Unsigned>
 struct hash<Chic::Integer<Unsigned>>
 {
-  std::size_t operator()(const Chic::Integer<Unsigned>& x) const { return x.value(); }
+  std::size_t operator()(const Chic::Integer<Unsigned>& x) const { return x; }
 };
 
 } // namespace std
