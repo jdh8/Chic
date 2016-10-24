@@ -58,14 +58,14 @@ class Dictionary
   public:
     Dictionary(int);
 
-    const Expression<Number>& operator[](const Number&) const;
+    Expression<Number> operator[](const Number&) const;
     const std::unordered_map<Number, Expression<Number>>& graph() const;
     const std::vector<std::vector<Number>>& hierarchy() const;
     int digit() const;
     Resolver resolve(const Number&) const;
 
     void grow();
-    const Expression<Number>& build(const Number&);
+    Expression<Number> build(const Number&, std::size_t limit = -1);
 };
 
 template<typename Number>
@@ -74,11 +74,14 @@ Dictionary<Number>::Dictionary(int digit)
 {}
 
 template<typename Number>
-const Expression<Number>& Dictionary<Number>::operator[](const Number& key) const
+Expression<Number> Dictionary<Number>::operator[](const Number& key) const
 {
-  static const Expression<Number> empty;
   auto found = _graph.find(key);
-  return found == _graph.end() ? empty : found->second;
+
+  if (found == _graph.end())
+    return {};
+  else
+    return found->second;
 }
 
 template<typename Number>
@@ -203,13 +206,15 @@ void Dictionary<Number>::grow()
 }
 
 template<typename Number>
-const Expression<Number>& Dictionary<Number>::build(const Number& key)
+Expression<Number> Dictionary<Number>::build(const Number& key, std::size_t limit)
 {
-  while (true) {
-    if (const auto& found = operator[](key))
+  while (_hierarchy.size() < limit) {
+    if (auto found = operator[](key))
       return found;
     grow();
   }
+
+  return {};
 }
 
 template<typename Number>
