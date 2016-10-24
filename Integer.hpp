@@ -127,9 +127,7 @@ Integer<Unsigned>& Integer<Unsigned>::operator-=(const Integer& other)
 template<typename Unsigned>
 Integer<Unsigned>& Integer<Unsigned>::operator*=(const Integer& other)
 {
-  Unsigned result = _value * other._value;
-
-  _value = (_value && result / _value == other._value) * result;
+  _value *= !__builtin_mul_overflow(_value, other._value, &_value);
 
   return *this;
 }
@@ -142,7 +140,9 @@ Integer<Unsigned>& Integer<Unsigned>::operator*=(const Integer& other)
 template<typename Unsigned>
 Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer& other)
 {
-  _value = (other._value && _value % other._value == 0) * (_value / other._value);
+  Unsigned result = _value / other._value;
+
+  _value = result * (other._value * result == _value);
 
   return *this;
 }

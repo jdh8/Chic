@@ -122,11 +122,7 @@ template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::apply(const Fraction& other)
 {
   _den *= other._den;
-
-  Unsigned cache = _num * other._num * !!_den;
-
-  _den *= !_num || cache / _num == other._num;
-  _num = cache;
+  _den *= !__builtin_mul_overflow(_num, other._num, &_num);
 
   return *this;
 }
@@ -207,12 +203,10 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
   Fraction c(_den.value(), other._den.value());
 
   if (_den *= c._den) {
-    Unsigned a = _num * c._den.value();
-    Unsigned b = other._num * c._num;
-
-    _den *= a / c._den.value() == _num;
+    Unsigned a, b;
+    _den *= !(__builtin_mul_overflow(_num, c._den.value(), &a) || __builtin_mul_overflow(other._num, c._num, &b));
     _num = a + b;
-    _den *= _num >= a && (!c._num || b / c._num == other._num);
+    _den *= _num >= a;
   }
   else {
     _num = 0;
@@ -227,10 +221,8 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
   Fraction c(_den.value(), other._den.value());
 
   if (_den *= c._den) {
-    Unsigned a = _num * c._den.value();
-    Unsigned b = other._num * c._num;
-
-    _den *= a >= b && a / c._den.value() == _num && (!c._num || b / c._num == other._num);
+    Unsigned a, b;
+    _den *= !(__builtin_mul_overflow(_num, c._den.value(), &a) || __builtin_mul_overflow(other._num, c._num, &b)) && a >= b;
     _num = (a - b) * !!_den;
   }
   else {
