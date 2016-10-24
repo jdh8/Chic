@@ -170,14 +170,18 @@ template<typename Number>
 template<typename Default>
 void Dictionary<Number>::pow(const Default& x, const Default& y)
 {
-  if (y.denominator().value() == 1 && y.numerator() <= 64 && x.numerator() && x.numerator() != x.denominator().value()) {
+  if (y.denominator().value() == 1 && y.numerator() <= 64 && x && x.numerator() != x.denominator().value()) {
     int shift = detail::ctz(y.numerator());
     auto odd = y.numerator() >> shift;
     Default base = x.pow(odd);
+    Default sqrt = base.sqrt();
+
+    quadratic(sqrt, { x, y, shift + 2 });
+    quadratic(sqrt.inverse(), { x, y, -(shift + 2) });
 
     while (shift >= 0 && base) {
-      quadratic(base, { x, y, shift + 1 });
-      quadratic(base.inverse(), { x, y, -(shift + 1) });
+      push(base, { x, y, shift + 1 });
+      push(base.inverse(), { x, y, -(shift + 1) });
 
       base.apply(base);
       --shift;

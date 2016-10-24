@@ -83,7 +83,7 @@ std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream,
   if (expr.second()) {
     int shift = std::abs(expr.symbol()) - 1;
 
-    if (shift < 32) {
+    if (shift < ' ') {
       for (int k = 0; k < shift; ++k)
         stream << "√";
       return stream << expr.first() << (expr.symbol() < 0 ? "^-" : "^") << expr.second();
