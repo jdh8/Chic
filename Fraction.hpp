@@ -37,30 +37,16 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
 {
   private:
     Unsigned _num;
-    Integer<Unsigned> _den;
+    Unsigned _den;
 
   public:
-    Fraction() = default;
+    Fraction();
     Fraction(const Unsigned&);
     Fraction(const Unsigned&, const Unsigned&);
-    Fraction(const Integer<Unsigned>&);
     Fraction(std::size_t, int);
 
-    /*!
-     * \brief Numerator of the fraction
-     *
-     * Because zero is a valid numerator, its type is Unsigned instead of
-     * Integer<Unsigned>.
-     */
     const Unsigned& numerator() const { return _num; }
-
-    /*!
-     * \brief Denominator of the fraction
-     *
-     * Integer<Unsigned> mixes zero with invalid representation.  This makes it
-     * a perfect denominator because zero denominator is also invalid.
-     */
-    const Integer<Unsigned>& denominator() const { return _den; }
+    const Unsigned& denominator() const { return _den; }
 
     Fraction& apply(const Fraction&);
 
@@ -75,14 +61,19 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
 
     explicit operator bool() const { return _num && _den; }
 
-    Fraction& operator++() { _num += _den.value(); return *this; }
-    Fraction& operator--() { _num -= _den.value(); return *this; }
+    Fraction& operator++() { _num += _den; return *this; }
+    Fraction& operator--() { _num -= _den; return *this; }
 
     Fraction& operator+=(const Fraction&);
     Fraction& operator-=(const Fraction&);
     Fraction& operator*=(const Fraction&);
     Fraction& operator/=(const Fraction&);
 };
+
+template<typename Unsigned>
+Fraction<Unsigned>::Fraction()
+  : _den(0)
+{}
 
 template<typename Unsigned>
 Fraction<Unsigned>::Fraction(const Unsigned& value)
@@ -108,21 +99,22 @@ Fraction<Unsigned>::Fraction(const Unsigned& numerator, const Unsigned& denomina
 }
 
 template<typename Unsigned>
-Fraction<Unsigned>::Fraction(const Integer<Unsigned>& integer)
-  : Fraction(integer.value())
-{}
-
-template<typename Unsigned>
-Fraction<Unsigned>::Fraction(std::size_t repeat, int digit)
-  : _num(Integer<Unsigned>(repeat, digit).value()),
+Fraction<Unsigned>::Fraction(std::size_t repeats, int digit)
+  : _num(0),
     _den(1)
-{}
+{
+  while (repeats--)
+    _num = 10 * _num + digit;
+}
 
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::apply(const Fraction& other)
 {
-  _den *= other._den;
-  _den *= !__builtin_mul_overflow(_num, other._num, &_num);
+  bool overflow = __builtin_mul_overflow(_num, other._num, &_num);
+
+  _den *= !__builtin_mul_overflow(_den, other._den, &_den);
+  _num |= overflow && _den && !_num;
+  _den *= !overflow;
 
   return *this;
 }
@@ -132,7 +124,7 @@ Fraction<Unsigned> Fraction<Unsigned>::inverse() const
 {
   Fraction result;
 
-  result._num = _den.value();
+  result._num = _den;
   result._den = _num * !!_den;
 
   return result;
@@ -144,8 +136,12 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
   Fraction result;
 
   result._num = std::sqrt(_num);
-  result._den = _den.sqrt() * (result._num * result._num == _num);
-  result._num *= !!result._den;
+  result._den = std::sqrt(_den);
+  
+  bool valid = (result._num * result._num == _num) && (result._den * result._den == _den);
+
+  result._num *= valid;
+  result._den *= valid;
 
   return result;
 }
@@ -153,12 +149,11 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 {
-  Fraction result = Integer<Unsigned>(_num).factorial();
+  Fraction result;
 
-  result._den *= !!result._num;
-
-  if (!result._num)
-    result._num = _den.value() == 1;
+  result._num = Integer<Unsigned>(_num).factorial().value();
+  result._den = !!result._num;
+  result._num |= _den == 1 && !result._num;
 
   return result;
 }
@@ -194,19 +189,21 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(Unsigned exponent) const
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::pow(const Fraction& exponent) const
 {
-  return exponent.denominator().value() == 1 ? pow(exponent.numerator()) : Fraction(0, 0);
+  return exponent._den == 1 ? pow(exponent._num) : Fraction(0, 0);
 }
 
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 {
-  Fraction c(_den.value(), other._den.value());
+  Fraction fraction(_den, other._den);
 
-  if (_den *= c._den) {
-    Unsigned a, b;
-    _den *= !(__builtin_mul_overflow(_num, c._den.value(), &a) || __builtin_mul_overflow(other._num, c._num, &b));
-    _num = a + b;
-    _den *= _num >= a;
+  if (_den *= !__builtin_mul_overflow(_den, fraction._den, &_den)) {
+    bool overflow = __builtin_mul_overflow(_num, fraction._den, &_num)
+                 || __builtin_mul_overflow(other._num, fraction._num, &fraction._num)
+                 || __builtin_add_overflow(_num, fraction._num, &_num);
+
+    _den *= !overflow;
+    _num |= overflow && !_num;
   }
   else {
     _num = 0;
@@ -218,16 +215,15 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
 {
-  Fraction c(_den.value(), other._den.value());
+  Fraction fraction(_den, other._den);
 
-  if (_den *= c._den) {
-    Unsigned a, b;
-    _den *= !(__builtin_mul_overflow(_num, c._den.value(), &a) || __builtin_mul_overflow(other._num, c._num, &b)) && a >= b;
-    _num = (a - b) * !!_den;
-  }
-  else {
-    _num = 0;
-  }
+  bool invalid = __builtin_mul_overflow(_den, fraction._den, &_den)
+              || __builtin_mul_overflow(_num, fraction._den, &_num)
+              || __builtin_mul_overflow(other._num, fraction._num, &fraction._num)
+              || __builtin_sub_overflow(_num, fraction._num, &_num);
+
+  _num *= !invalid;
+  _den *= !invalid;
 
   return *this;
 }
@@ -235,8 +231,8 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::operator*=(const Fraction& other)
 {
-  Fraction a(_num, other._den.value());
-  Fraction b(other._num, _den.value());
+  Fraction a(_num, other._den);
+  Fraction b(other._num, _den);
 
   return *this = a.apply(b);
 }
@@ -256,10 +252,10 @@ bool operator==(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
 template<typename Character, typename Unsigned>
 std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Fraction<Unsigned>& fraction)
 {
-  if (fraction.denominator().value() == 1)
+  if (fraction.denominator() == 1)
     return stream << fraction.numerator();
   else if (fraction.denominator())
-    return stream << '(' << fraction.numerator() << '/' << fraction.denominator().value() << ')';
+    return stream << '(' << fraction.numerator() << '/' << fraction.denominator() << ')';
   else
     return stream << (fraction.numerator() ? "inf" : "nan");
 }
@@ -269,13 +265,19 @@ std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream,
 namespace std {
 
 template<typename Unsigned>
+bool isfinite(const Chic::Fraction<Unsigned>& fraction)
+{
+  return fraction.denominator();
+}
+
+template<typename Unsigned>
 struct hash<Chic::Fraction<Unsigned>>
 {
   std::size_t operator()(const Chic::Fraction<Unsigned>& fraction) const
   {
     Chic::Integer<std::size_t> numerator = fraction.numerator();
 
-    return Chic::rotate(numerator, (std::numeric_limits<std::size_t>::digits / 2)).value() ^ fraction.denominator().value();
+    return Chic::rotate(numerator, (std::numeric_limits<std::size_t>::digits / 2)).value() ^ fraction.denominator();
   }
 };
 
