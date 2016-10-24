@@ -38,7 +38,8 @@ class Dictionary
     std::vector<std::vector<Number>> _hierarchy;
     const int _digit;
 
-    void emplace(Number, Expression<Number>);
+    bool push(const Number&, const Expression<Number>&);
+    void quadratic(Number, Expression<Number>);
     void factorial();
 
     template<typename Unsigned>
@@ -103,11 +104,20 @@ int Dictionary<Number>::digit() const
 }
 
 template<typename Number>
-void Dictionary<Number>::emplace(Number key, Expression<Number> expr)
+bool Dictionary<Number>::push(const Number& key, const Expression<Number>& expr)
 {
-  while (key && _graph.emplace(key, expr).second) {
+  bool status = key && _graph.emplace(key, expr).second;
+
+  if (status)
     _hierarchy.back().emplace_back(key);
 
+  return status;
+}
+
+template<typename Number>
+void Dictionary<Number>::quadratic(Number key, Expression<Number> expr)
+{
+  while (push(key, expr)) {
     expr = { key, 's' };
     key = key.sqrt();
   }
@@ -124,8 +134,7 @@ void Dictionary<Number>::factorial()
     auto y = x.factorial();
 
     // Due to Bertrand's postulate, from 2! on, factorials cannot be a perfect square.
-    while (y && _graph.emplace(y, Expression<Number>(x, '!')).second) {
-      destination.emplace_back(y);
+    while (push(y, { x, '!' })) {
       x = y;
       y = y.factorial();
     }
@@ -136,8 +145,8 @@ template<typename Number>
 template<typename Unsigned>
 void Dictionary<Number>::divides(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
-  emplace(x / y, { x, y, '/' });
-  emplace(y / x, { y, x, '/' });
+  quadratic(x / y, { x, y, '/' });
+  quadratic(y / x, { y, x, '/' });
 }
 
 template<typename Number>
@@ -146,15 +155,15 @@ void Dictionary<Number>::divides(const Default& x, const Default& y)
 {
   Default quotient = x / y;
 
-  emplace(quotient, { x, y, '/' });
-  emplace(quotient.inverse(), { y, x, '/' });
+  quadratic(quotient, { x, y, '/' });
+  quadratic(quotient.inverse(), { y, x, '/' });
 }
 
 template<typename Number>
 template<typename Unsigned>
 void Dictionary<Number>::pow(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
-  emplace(x.pow(y), { x, y, '^' });
+  quadratic(x.pow(y), { x, y, '^' });
 }
 
 template<typename Number>
@@ -167,8 +176,8 @@ void Dictionary<Number>::pow(const Default& x, const Default& y)
     Default base = x.pow(odd);
 
     while (shift >= 0 && base) {
-      emplace(base, { x, y, shift + 1 });
-      emplace(base.inverse(), { x, y, -(shift + 1) });
+      quadratic(base, { x, y, shift + 1 });
+      quadratic(base.inverse(), { x, y, -(shift + 1) });
 
       base.apply(base);
       --shift;
@@ -179,11 +188,11 @@ void Dictionary<Number>::pow(const Default& x, const Default& y)
 template<typename Number>
 void Dictionary<Number>::binary(const Number& x, const Number& y)
 {
-  emplace(x + y, { x, y, '+' });
-  emplace(x * y, { x, y, '*' });
+  quadratic(x + y, { x, y, '+' });
+  quadratic(x * y, { x, y, '*' });
 
-  emplace(x - y, { x, y, '-' });
-  emplace(y - x, { y, x, '-' });
+  quadratic(x - y, { x, y, '-' });
+  quadratic(y - x, { y, x, '-' });
 
   divides(x, y);
 
@@ -200,7 +209,7 @@ void Dictionary<Number>::grow()
   std::size_t size = _hierarchy.size();
   Number root(size, _digit);
 
-  emplace(root, root);
+  quadratic(root, root);
 
   for (auto length = size / 2; length > 0; --length)
     for (const auto& x: base[length])
