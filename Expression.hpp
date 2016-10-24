@@ -18,7 +18,7 @@
 #ifndef CHIC_EXPRESSION_HPP
 #define CHIC_EXPRESSION_HPP
 
-#include "Integer.hpp"
+#include "Fraction.hpp"
 
 namespace Chic {
 
@@ -28,26 +28,26 @@ class Expression
   private:
     Index _first;
     Index _second;
-    signed char _symbol;
+    int _symbol;
 
   public:
-    Expression(const Index& = {}, signed char = 0);
-    Expression(const Index&, const Index&, signed char);
+    Expression(const Index& = {}, int = 0);
+    Expression(const Index&, const Index&, int);
 
     const Index& first() const;
     const Index& second() const;
-    signed char symbol() const;
+    int symbol() const;
     operator bool() const;
 };
 
 template<typename Index>
-Expression<Index>::Expression(const Index& first, signed char symbol)
+Expression<Index>::Expression(const Index& first, int symbol)
   : _first(first),
     _symbol(symbol)
 {}
 
 template<typename Index>
-Expression<Index>::Expression(const Index& first, const Index& second, signed char symbol)
+Expression<Index>::Expression(const Index& first, const Index& second, int symbol)
   : _first(first),
     _second(second),
     _symbol(symbol)
@@ -66,7 +66,7 @@ const Index& Expression<Index>::second() const
 }
 
 template<typename Index>
-signed char Expression<Index>::symbol() const
+int Expression<Index>::symbol() const
 {
   return _symbol;
 }
@@ -81,23 +81,23 @@ template<typename Character, typename Index>
 std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Expression<Index>& expr)
 {
   if (expr.second()) {
-    int shift = std::abs(expr.symbol());
+    int shift = std::abs(expr.symbol()) - 1;
 
     if (shift < 32) {
       for (int k = 0; k < shift; ++k)
         stream << "√";
-      return stream << '(' << expr.first() << ')' << (expr.symbol() < 0 ? "^-" : "^") << expr.second();
+      return stream << expr.first() << (expr.symbol() < 0 ? "^-" : "^") << expr.second();
     }
 
-    return stream << expr.first() << ' ' << expr.symbol() << ' ' << expr.second();
+    return stream << expr.first() << ' ' << char(expr.symbol()) << ' ' << expr.second();
   }
   else switch (expr.symbol()) {
     case '!':
       return stream << expr.first() << '!';
     case 's':
-      return stream << "√(" << expr.first() << ')';
+      return stream << "√" << expr.first();
     default:
-      return stream << expr.symbol() << expr.first();
+      return stream << char(expr.symbol()) << expr.first();
   }
 }
 

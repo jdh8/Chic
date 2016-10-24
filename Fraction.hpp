@@ -264,17 +264,12 @@ bool operator==(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
 template<typename Character, typename Unsigned>
 std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Fraction<Unsigned>& fraction)
 {
-  if (fraction.denominator()) {
-    stream << fraction.numerator();
-
-    if (fraction.denominator().value() != 1)
-      stream << '/' << fraction.denominator().value();
-  }
-  else {
-    stream << (fraction.numerator() ? "inf" : "nan");
-  }
-
-  return stream;
+  if (fraction.denominator().value() == 1)
+    return stream << fraction.numerator();
+  else if (fraction.denominator())
+    return stream << '(' << fraction.numerator() << '/' << fraction.denominator().value() << ')';
+  else
+    return stream << (fraction.numerator() ? "inf" : "nan");
 }
 
 } // namespace Chic

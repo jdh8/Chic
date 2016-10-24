@@ -167,8 +167,8 @@ void Dictionary<Number>::pow(const Default& x, const Default& y)
     Default base = x.pow(odd);
 
     while (shift >= 0 && base) {
-      emplace(base, { x, y, shift });
-      emplace(base.inverse(), { x, y, -shift });
+      emplace(base, { x, y, shift + 1 });
+      emplace(base.inverse(), { x, y, -(shift + 1) });
 
       base.apply(base);
       --shift;
