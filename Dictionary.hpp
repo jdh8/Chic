@@ -155,22 +155,25 @@ template<typename Unsigned>
 void Dictionary<Number>::pow(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
 {
   emplace(x.pow(y), { x, y, '^' });
-  emplace(y.pow(x), { y, x, '^' });
 }
 
 template<typename Number>
 template<typename Default>
 void Dictionary<Number>::pow(const Default& x, const Default& y)
 {
-  Default cache = x.pow(y);
+  if (y.denominator().value() == 1 && y.numerator() <= 64 && x.numerator() && x.numerator() != x.denominator().value()) {
+    int shift = detail::ctz(y.numerator());
+    auto odd = y.numerator() >> shift;
+    Default base = x.pow(odd);
 
-  emplace(cache, { x, y, '^' });
-  emplace(cache.inverse(), { x, y, -'^' });
+    while (shift >= 0 && base) {
+      emplace(base, { x, y, shift });
+      emplace(base.inverse(), { x, y, -shift });
 
-  cache = y.pow(x);
-
-  emplace(cache, { y, x, '^' });
-  emplace(cache.inverse(), { y, x, -'^' });
+      base.apply(base);
+      --shift;
+    }
+  }
 }
 
 template<typename Number>
@@ -183,7 +186,9 @@ void Dictionary<Number>::binary(const Number& x, const Number& y)
   emplace(y - x, { y, x, '-' });
 
   divides(x, y);
+
   pow(x, y);
+  pow(y, x);
 }
 
 template<typename Number>

@@ -39,8 +39,6 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Unsigned _num;
     Integer<Unsigned> _den;
 
-    Fraction& apply(const Fraction&);
-
   public:
     Fraction() = default;
     Fraction(const Unsigned&);
@@ -63,6 +61,8 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
      * a perfect denominator because zero denominator is also invalid.
      */
     const Integer<Unsigned>& denominator() const { return _den; }
+
+    Fraction& apply(const Fraction&);
 
     Fraction inverse() const;
     Fraction sqrt() const;

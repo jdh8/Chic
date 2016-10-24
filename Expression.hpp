@@ -18,7 +18,7 @@
 #ifndef CHIC_EXPRESSION_HPP
 #define CHIC_EXPRESSION_HPP
 
-#include <iosfwd>
+#include "Integer.hpp"
 
 namespace Chic {
 
@@ -80,17 +80,22 @@ Expression<Index>::operator bool() const
 template<typename Character, typename Index>
 std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Expression<Index>& expr)
 {
-  if (expr.second()) switch (expr.symbol()) {
-    case -'^':
-      return stream << expr.first() << " ^-" << expr.second();
-    default:
-      return stream << expr.first() << ' ' << expr.symbol() << ' ' << expr.second();
+  if (expr.second()) {
+    int shift = std::abs(expr.symbol());
+
+    if (shift < 32) {
+      for (int k = 0; k < shift; ++k)
+        stream << "√";
+      return stream << '(' << expr.first() << ')' << (expr.symbol() < 0 ? "^-" : "^") << expr.second();
+    }
+
+    return stream << expr.first() << ' ' << expr.symbol() << ' ' << expr.second();
   }
   else switch (expr.symbol()) {
-    case 's':
-      return stream << "√" << expr.first();
     case '!':
       return stream << expr.first() << '!';
+    case 's':
+      return stream << "√(" << expr.first() << ')';
     default:
       return stream << expr.symbol() << expr.first();
   }
