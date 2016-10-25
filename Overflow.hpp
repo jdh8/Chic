@@ -15,44 +15,78 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef CHIC_CHECKED_HPP
-#define CHIC_CHECKED_HPP
+#ifndef CHIC_OVERFLOW_HPP
+#define CHIC_OVERFLOW_HPP
+
+#include <limits>
+#include <type_traits>
 
 namespace Chic {
-/*!
- * \brief Cross-platform integer overflow checker
- */
+
+template<typename Integer>
+class OverflowBase
+{
+  protected:
+    OverflowBase();
+};
+
+template<typename Integer>
+OverflowBase<Integer>::OverflowBase()
+{
+  static_assert(std::numeric_limits<Integer>::is_integer, "The underlying type must be an integer.");
+}
+
+template<typename Integer, bool IsSigned = std::numeric_limits<Integer>::is_signed>
+class Overflow;
+
 template<typename Unsigned>
-class Checked
+class Overflow<Unsigned, false>
 {
   private:
     Unsigned _value;
 
   public:
-    Checked();
-    Checked(const Unsigned&);
+    Overflow() = default;
+    Overflow(Unsigned);
 
-    operator const Unsigned&() const { return _value; }
+    template<typename Signed>
+    Overflow(Overflow<Signed, true>);
 
-    bool operator+=(const Unsigned&);
-    bool operator-=(const Unsigned&);
-    bool operator*=(const Unsigned&);
+    operator Unsigned() const;
+
+    template<typename Other>
+    bool operator+=(Other);
+
+    template<typename Other>
+    bool operator-=(Other);
+
+    template<typename Other>
+    bool operator*=(Other);
 };
 
 template<typename Unsigned>
-Checked<Unsigned>::Checked()
-{}
-
-template<typename Unsigned>
-Checked<Unsigned>::Checked(const Unsigned& value)
+Overflow<Unsigned, false>::Overflow(Unsigned value)
   : _value(value)
 {}
 
 template<typename Unsigned>
-bool Checked<Unsigned>::operator+=(const Unsigned& other)
+template<typename Signed>
+Overflow<Unsigned, false>::Overflow(Overflow<Signed, true> other)
+  : _value(other)
+{}
+
+template<typename Unsigned>
+Overflow<Unsigned, false>::operator Unsigned() const
+{
+  return _value;
+}
+
+template<typename Unsigned>
+template<typename Other>
+bool Overflow<Unsigned, false>::operator+=(Other other)
 {
   #ifdef __GNUC__
-    return !__builtin_add_overflow(_value, other, &_value);
+    return __builtin_add_overflow(_value, other, &_value);
   #else
     _value += other;
     return _value < other;
@@ -60,29 +94,130 @@ bool Checked<Unsigned>::operator+=(const Unsigned& other)
 }
 
 template<typename Unsigned>
-bool Checked<Unsigned>::operator-=(const Unsigned& other)
+template<typename Other>
+bool Overflow<Unsigned, false>::operator-=(Other other)
 {
   #ifdef __GNUC__
-    return !__builtin_sub_overflow(_value, other, &_value);
+    return __builtin_sub_overflow(_value, other, &_value);
   #else
-    bool sane = _value >= other;
+    bool overflow = _value < other;
     _value -= other;
-    return sane;
+    return overflow;
   #endif
 }
 
 template<typename Unsigned>
-bool Checked<Unsigned>::operator*=(const Unsigned& other)
+template<typename Other>
+bool Overflow<Unsigned, false>::operator*=(Other other)
 {
   #ifdef __GNUC__
-    return !__builtin_mul_overflow(_value, other, &_value);
+    return __builtin_mul_overflow(_value, other, &_value);
   #else
     Unsigned cache = _value;
     _value *= other;
-    return !other || _value / other == cache;
+    return other && _value / other != cache;
+  #endif
+}
+
+template<typename Signed>
+class Overflow<Signed, true>
+{
+  private:
+    typedef typename std::make_unsigned<Signed>::type Unsigned_t;
+
+    Signed _value;
+
+    static Signed _convert(Unsigned_t);
+
+  public:
+    Overflow() = default;
+    Overflow(Signed);
+
+    template<typename Unsigned>
+    Overflow(Overflow<Unsigned, false>);
+
+    operator Signed() const;
+
+    template<typename Other>
+    bool operator+=(Other);
+
+    template<typename Other>
+    bool operator-=(Other);
+
+    template<typename Other>
+    bool operator*=(Other);
+};
+
+template<typename Signed>
+Signed Overflow<Signed, true>::_convert(Unsigned_t x)
+{
+  const Signed min = std::numeric_limits<Signed>::min();
+
+  return x >= min ? Signed(x - min) + min : x;
+}
+
+template<typename Signed>
+Overflow<Signed, true>::Overflow(Signed value)
+  : _value(value)
+{}
+
+template<typename Signed>
+template<typename Unsigned>
+Overflow<Signed, true>::Overflow(Overflow<Unsigned, false> other)
+  : _value(_convert(other))
+{}
+
+template<typename Signed>
+Overflow<Signed, true>::operator Signed() const
+{
+  return _value;
+}
+
+template<typename Signed>
+template<typename Other>
+bool Overflow<Signed, true>::operator+=(Other other)
+{
+  #ifdef __GNUC__
+    return __builtin_add_overflow(_value, other, &_value);
+  #else
+    Overflow<Unsigned_t> copy(*this);
+    bool overflow = copy += other;
+
+    *this = copy;
+    return overflow;
+  #endif
+}
+
+template<typename Signed>
+template<typename Other>
+bool Overflow<Signed, true>::operator-=(Other other)
+{
+  #ifdef __GNUC__
+    return __builtin_sub_overflow(_value, other, &_value);
+  #else
+    Overflow<Unsigned_t> copy(*this);
+    bool overflow = copy -= other;
+
+    *this = copy;
+    return overflow;
+  #endif
+}
+
+template<typename Signed>
+template<typename Other>
+bool Overflow<Signed, true>::operator*=(Other other)
+{
+  #ifdef __GNUC__
+    return __builtin_mul_overflow(_value, other, &_value);
+  #else
+    Overflow<Unsigned_t> copy(*this);
+    bool overflow = copy *= other;
+
+    *this = copy;
+    return overflow;
   #endif
 }
 
 } // namespace Chic
 
-#endif // CHIC_CHECKED_HPP
+#endif // CHIC_OVERFLOW_HPP
