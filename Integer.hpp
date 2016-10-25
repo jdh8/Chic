@@ -19,9 +19,10 @@
 #define CHIC_INTEGER_HPP
 
 #include "Arithmetic.hpp"
+#include "Overflow.hpp"
+#include "Factorial.hpp"
+
 #include <functional>
-#include <limits>
-#include <vector>
 #include <sstream>
 #include <cmath>
 
@@ -196,37 +197,6 @@ Integer<Unsigned> Integer<Unsigned>::sqrt() const
   return (result * result == value()) * result;
 }
 
-template<typename Unsigned>
-class Factorial
-{
-  private:
-    std::vector<Integer<Unsigned>> _table;
-
-  public:
-    Factorial();
-    Integer<Unsigned> operator()(const Integer<Unsigned>&) const;
-};
-
-template<typename Unsigned>
-Factorial<Unsigned>::Factorial()
-  : _table(1, 1)
-{
-  for (Integer<Unsigned> k = 1; ; ++k) {
-    Integer<Unsigned> candidate = k * _table.back();
-
-    if (candidate)
-      _table.push_back(candidate);
-    else
-      break;
-  }
-}
-
-template<typename Unsigned>
-Integer<Unsigned> Factorial<Unsigned>::operator()(const Integer<Unsigned>& n) const
-{
-  return n < _table.size() ? _table[n] : Integer<Unsigned>(0);
-}
-
 /*!
  * \brief Exact factorial
  *
@@ -236,7 +206,7 @@ template<typename Unsigned>
 Integer<Unsigned> Integer<Unsigned>::factorial() const
 {
   static const Factorial<Unsigned> implementation;
-  return implementation(*this);
+  return implementation(_value);
 }
 
 /*!
