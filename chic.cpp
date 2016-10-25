@@ -2,6 +2,7 @@
 #include "Fraction.hpp"
 #include <future>
 #include <iostream>
+#include <sstream>
 #include <cstdint>
 
 template<typename Wrapper, typename Unsigned>

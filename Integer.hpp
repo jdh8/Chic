@@ -21,70 +21,41 @@
 #include "Arithmetic.hpp"
 #include "Overflow.hpp"
 #include "Factorial.hpp"
-
-#include <functional>
-#include <sstream>
 #include <cmath>
 
 namespace Chic {
-/*!
- * \brief Integer with exact arithmetic
- *
- * \tparam Unsigned  Underlying unsigned type
- *
- * Exact elementary arithmetic, exponentiation, and square root are provided.
- * If there is no representable exact answer, 0 is returned.
- *
- * Unsigned integer overflow wraps around, but signed integer overflow causes
- * undefined behavior.  Therefore, the underlying type must be unsigned.
- */
+
 template<typename Unsigned>
 class Integer : public Arithmetic<Integer<Unsigned>>
 {
   private:
-    Unsigned _value;
+    Overflow<Unsigned> _value;
 
   public:
     Integer(const Unsigned& = 0);
     Integer(std::size_t, int);
 
-    const Unsigned& value() const { return _value; }
+    operator Unsigned() const;
+    Unsigned value() const;
 
-    operator const Unsigned&() const { return _value; }
+    Integer& operator*=(bool);
 
-    Integer& operator*=(bool condition) { _value *= condition; return *this; }
-
-    Integer& operator++() { ++_value; return *this; }
-    Integer& operator--() { --_value; return *this; }
-
-    Integer& operator+=(const Integer&);
-    Integer& operator-=(const Integer&);
-    Integer& operator*=(const Integer&);
-    Integer& operator/=(const Integer&);
+    Integer& operator+=(Integer);
+    Integer& operator-=(Integer);
+    Integer& operator*=(Integer);
+    Integer& operator/=(Integer);
 
     Integer pow(Unsigned) const;
     Integer sqrt() const;
     Integer factorial() const;
-    Integer factorial(const Integer&) const;
+    Integer factorial(Integer) const;
 };
 
 template<typename Unsigned>
 Integer<Unsigned>::Integer(const Unsigned& value)
   : _value(value)
-{
-  typedef std::numeric_limits<Unsigned> Traits;
-  static_assert(Traits::is_integer && !Traits::is_signed, "The underlying type must be an unsigned integer.");
-}
+{}
 
-/*!
- * \brief Construct a repeating number
- *
- * For example, 3333 can be constructed with Integer(4, 3).
- *
- * This special constructor is provided because Tchisla allows digit
- * concatenation.  The signature of this constructor resembles
- * std::string::string(size_t, char) to provide a consistent interface.
- */
 template<typename Unsigned>
 Integer<Unsigned>::Integer(std::size_t repeats, int digit)
   : _value(0)
@@ -93,53 +64,48 @@ Integer<Unsigned>::Integer(std::size_t repeats, int digit)
     _value = 10 * _value + digit;
 }
 
-/*!
- * \brief Exact addition
- *
- * Overflow causes inexact result, so then 0 is returned.
- */
 template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator+=(const Integer& other)
+Integer<Unsigned>::operator Unsigned() const
 {
-  _value += other._value;
-  _value *= other._value <= _value;
+  return _value;
+}
 
+template<typename Unsigned>
+Unsigned Integer<Unsigned>::value() const
+{
+  return _value;
+}
+
+template<typename Unsigned>
+Integer<Unsigned>& Integer<Unsigned>::operator*=(bool condition)
+{
+  _value *= condition;
   return *this;
 }
 
-/*!
- * \brief Exact subtraction
- *
- * Underflow causes inexact result, so then 0 is returned.
- */
 template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator-=(const Integer& other)
+Integer<Unsigned>& Integer<Unsigned>::operator+=(Integer other)
 {
-  _value = (_value >= other._value) * (_value - other._value);
-
+  _value *= !(_value += other.value());
   return *this;
 }
 
-/*!
- * \brief Exact multiplication
- *
- * Overflow causes inexact result, so then 0 is returned.
- */
 template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator*=(const Integer& other)
+Integer<Unsigned>& Integer<Unsigned>::operator-=(Integer other)
 {
-  _value *= !__builtin_mul_overflow(_value, other._value, &_value);
-
+  _value *= !(_value -= other.value());
   return *this;
 }
 
-/*!
- * \brief Exact division
- *
- * If there is no exact quotient, 0 is returned.
- */
 template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer& other)
+Integer<Unsigned>& Integer<Unsigned>::operator*=(Integer other)
+{
+  _value *= !(_value *= other.value());
+  return *this;
+}
+
+template<typename Unsigned>
+Integer<Unsigned>& Integer<Unsigned>::operator/=(Integer other)
 {
   Unsigned result = _value / other._value;
 
@@ -149,7 +115,7 @@ Integer<Unsigned>& Integer<Unsigned>::operator/=(const Integer& other)
 }
 
 template<typename Unsigned, typename Other>
-Integer<Unsigned> operator*(Integer<Unsigned> x, const Other& other)
+Integer<Unsigned> operator*(Integer<Unsigned> x, Other other)
 {
   return x *= other;
 }
@@ -160,17 +126,6 @@ Integer<Unsigned> operator*(bool condition, Integer<Unsigned> x)
   return x *= condition;
 }
 
-template<typename Character, typename Unsigned>
-std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Integer<Unsigned>& integer)
-{
-  return stream << integer.value();
-}
-
-/*!
- * \brief Exact exponentiation
- *
- * Overflow causes inexact result, so then 0 is returned.
- */
 template<typename Unsigned>
 Integer<Unsigned> Integer<Unsigned>::pow(Unsigned exponent) const
 {
@@ -185,11 +140,6 @@ Integer<Unsigned> Integer<Unsigned>::pow(Unsigned exponent) const
   return result;
 }
 
-/*!
- * \brief Exact square root
- *
- * If the argument is no perfect square, 0 is returned.
- */
 template<typename Unsigned>
 Integer<Unsigned> Integer<Unsigned>::sqrt() const
 {
@@ -197,25 +147,14 @@ Integer<Unsigned> Integer<Unsigned>::sqrt() const
   return (result * result == value()) * result;
 }
 
-/*!
- * \brief Exact factorial
- *
- * Overflow causes inexact result, so then 0 is returned.
- */
 template<typename Unsigned>
 Integer<Unsigned> Integer<Unsigned>::factorial() const
 {
-  static const Factorial<Unsigned> implementation;
-  return implementation(_value);
+  return Chic::factorial(_value);
 }
 
-/*!
- * \brief Exact factorial ratio
- *
- * Overflow causes inexact result, so then 0 is returned.
- */
 template<typename Unsigned>
-Integer<Unsigned> Integer<Unsigned>::factorial(const Integer& lesser) const
+Integer<Unsigned> Integer<Unsigned>::factorial(Integer lesser) const
 {
   Integer result = *this >= lesser;
 

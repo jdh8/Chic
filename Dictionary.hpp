@@ -20,13 +20,11 @@
 
 #include "Expression.hpp"
 #include "IO.hpp"
+#include "Integer.hpp"
 #include <unordered_map>
 #include <vector>
 
 namespace Chic {
-
-template<typename>
-class Integer;
 
 template<typename Number>
 class Dictionary

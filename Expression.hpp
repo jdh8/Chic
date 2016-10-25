@@ -18,7 +18,8 @@
 #ifndef CHIC_EXPRESSION_HPP
 #define CHIC_EXPRESSION_HPP
 
-#include "Fraction.hpp"
+#include <iosfwd>
+#include <cmath>
 
 namespace Chic {
 

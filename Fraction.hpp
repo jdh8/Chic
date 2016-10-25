@@ -18,7 +18,6 @@
 #ifndef CHIC_FRACTION_HPP
 #define CHIC_FRACTION_HPP
 
-#include "Factorial.hpp"
 #include "Integer.hpp"
 
 namespace Chic {

@@ -25,34 +25,11 @@ namespace Chic {
 template<typename Derived>
 struct Arithmetic
 {
-  friend bool operator!=(const Derived& x, const Derived& y) { return !(x == y); }
-  friend bool operator<=(const Derived& x, const Derived& y) { return !(y < x); }
-  friend bool operator>(const Derived& x, const Derived& y) { return y < x; }
-  friend bool operator>=(const Derived& x, const Derived& y) { return !(x < y); }
-
-  friend Derived operator++(Derived& x, int) { Derived tmp; ++x; return tmp; }
-  friend Derived operator--(Derived& x, int) { Derived tmp; --x; return tmp; }
-
   friend Derived operator+(Derived x, const Derived& y) { return x += y; }
   friend Derived operator-(Derived x, const Derived& y) { return x -= y; }
   friend Derived operator*(Derived x, const Derived& y) { return x *= y; }
   friend Derived operator/(Derived x, const Derived& y) { return x /= y; }
-  friend Derived operator%(Derived x, const Derived& y) { return x %= y; }
-
-  template<typename Character>
-  explicit operator std::basic_string<Character>() const;
 };
-
-template<typename Derived>
-template<typename Character>
-Arithmetic<Derived>::operator std::basic_string<Character>() const
-{
-  std::basic_ostringstream<Character> stream;
-
-  stream << static_cast<const Derived&>(*this);
-
-  return stream.str();
-}
 
 } // namespace Chic
 
