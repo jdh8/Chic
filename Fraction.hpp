@@ -36,8 +36,8 @@ template<typename Unsigned>
 class Fraction : public Arithmetic<Fraction<Unsigned>>
 {
   private:
-    Unsigned _num;
-    Unsigned _den;
+    Overflow<Unsigned> _num;
+    Overflow<Unsigned> _den;
 
   public:
     Fraction();
@@ -45,8 +45,8 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction(const Unsigned&, const Unsigned&);
     Fraction(std::size_t, int);
 
-    const Unsigned& numerator() const { return _num; }
-    const Unsigned& denominator() const { return _den; }
+    Unsigned numerator() const { return _num; }
+    Unsigned denominator() const { return _den; }
 
     Fraction& apply(const Fraction&);
 
@@ -93,7 +93,7 @@ Fraction<Unsigned>::Fraction(const Unsigned& numerator, const Unsigned& denomina
     _den(denominator)
 {
   if (Unsigned divisor = detail::gcd(numerator, denominator)) {
-    _num /= divisor;
+    _num = numerator / divisor;
     _den = denominator / divisor;
   }
 }
@@ -110,11 +110,11 @@ Fraction<Unsigned>::Fraction(std::size_t repeats, int digit)
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::apply(const Fraction& other)
 {
-  bool overflow = __builtin_mul_overflow(_num, other._num, &_num);
+  bool overflow = _num *= other._num;
+  bool invalid = _den *= other._den;
 
-  _den *= !__builtin_mul_overflow(_den, other._den, &_den);
-  _num |= overflow && _den && !_num;
-  _den *= !overflow;
+  _den *= !(invalid || overflow);
+  _num = _num | (overflow && !(invalid || _num));
 
   return *this;
 }
@@ -135,8 +135,8 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 {
   Fraction result;
 
-  result._num = std::sqrt(_num);
-  result._den = std::sqrt(_den);
+  result._num = std::sqrt(Unsigned(_num));
+  result._den = std::sqrt(Unsigned(_den));
   
   bool valid = (result._num * result._num == _num) && (result._den * result._den == _den);
 
@@ -151,9 +151,9 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 {
   Fraction result;
 
-  result._num = Integer<Unsigned>(_num).factorial();
+  result._num = Integer<Unsigned>(_num).factorial().value();
   result._den = !!result._num;
-  result._num |= _den == 1 && !result._num;
+  result._num = result._num | (_den == 1 && !result._num);
 
   return result;
 }
@@ -197,16 +197,14 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 {
   Fraction fraction(_den, other._den);
 
-  if (_den *= !__builtin_mul_overflow(_den, fraction._den, &_den)) {
-    bool overflow = __builtin_mul_overflow(_num, fraction._den, &_num)
-                 || __builtin_mul_overflow(other._num, fraction._num, &fraction._num)
-                 || __builtin_add_overflow(_num, fraction._num, &_num);
-
-    _den *= !overflow;
-    _num |= overflow && !_num;
+  if (_den *= fraction._den) {
+    _num = 0;
   }
   else {
-    _num = 0;
+    bool overflow = (_num *= fraction._den) || (fraction._num *= other._num) || (_num += fraction._num);
+
+    _den *= !overflow;
+    _num = _num | (overflow && !_num);
   }
 
   return *this;
@@ -217,10 +215,7 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
 {
   Fraction fraction(_den, other._den);
 
-  bool invalid = __builtin_mul_overflow(_den, fraction._den, &_den)
-              || __builtin_mul_overflow(_num, fraction._den, &_num)
-              || __builtin_mul_overflow(other._num, fraction._num, &fraction._num)
-              || __builtin_sub_overflow(_num, fraction._num, &_num);
+  bool invalid = (_den *= fraction._den) || (_num *= fraction._den) || (fraction._num *= other._num) || (_num -= fraction._num);
 
   _num *= !invalid;
   _den *= !invalid;
