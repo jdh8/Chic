@@ -54,10 +54,14 @@ class Overflow<Unsigned, false>
 
     operator Unsigned() const;
 
-    bool operator+=(Unsigned);
-    bool operator-=(Unsigned);
-    bool operator*=(Unsigned);
-    void operator*=(bool);
+    template<typename Other>
+    bool operator+=(Other);
+
+    template<typename Other>
+    bool operator-=(Other);
+
+    template<typename Other>
+    bool operator*=(Other);
 };
 
 template<typename Unsigned>
@@ -78,7 +82,8 @@ Overflow<Unsigned, false>::operator Unsigned() const
 }
 
 template<typename Unsigned>
-bool Overflow<Unsigned, false>::operator+=(Unsigned other)
+template<typename Other>
+bool Overflow<Unsigned, false>::operator+=(Other other)
 {
   #ifdef __GNUC__
     return __builtin_add_overflow(_value, other, &_value);
@@ -89,7 +94,8 @@ bool Overflow<Unsigned, false>::operator+=(Unsigned other)
 }
 
 template<typename Unsigned>
-bool Overflow<Unsigned, false>::operator-=(Unsigned other)
+template<typename Other>
+bool Overflow<Unsigned, false>::operator-=(Other other)
 {
   #ifdef __GNUC__
     return __builtin_sub_overflow(_value, other, &_value);
@@ -101,7 +107,8 @@ bool Overflow<Unsigned, false>::operator-=(Unsigned other)
 }
 
 template<typename Unsigned>
-bool Overflow<Unsigned, false>::operator*=(Unsigned other)
+template<typename Other>
+bool Overflow<Unsigned, false>::operator*=(Other other)
 {
   #ifdef __GNUC__
     return __builtin_mul_overflow(_value, other, &_value);
@@ -110,12 +117,6 @@ bool Overflow<Unsigned, false>::operator*=(Unsigned other)
     _value *= other;
     return other && _value / other != cache;
   #endif
-}
-
-template<typename Unsigned>
-void Overflow<Unsigned, false>::operator*=(bool condition)
-{
-  _value *= condition;
 }
 
 template<typename Signed>
@@ -145,8 +146,6 @@ class Overflow<Signed, true>
 
     template<typename Other>
     bool operator*=(Other);
-
-    void operator*=(bool);
 };
 
 template<typename Signed>
@@ -217,12 +216,6 @@ bool Overflow<Signed, true>::operator*=(Other other)
     *this = copy;
     return overflow;
   #endif
-}
-
-template<typename Signed>
-void Overflow<Signed, true>::operator*=(bool condition)
-{
-  _value *= condition;
 }
 
 } // namespace Chic

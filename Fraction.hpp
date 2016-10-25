@@ -45,8 +45,8 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction(const Unsigned&, const Unsigned&);
     Fraction(std::size_t, int);
 
-    Unsigned numerator() const { return _num; }
-    Unsigned denominator() const { return _den; }
+    Unsigned num() const { return _num; }
+    Unsigned den() const { return _den; }
 
     Fraction& apply(const Fraction&);
 
@@ -82,19 +82,19 @@ Fraction<Unsigned>::Fraction(const Unsigned& value)
 {}
 
 /*!
- * \brief Construct from a numerator and a denominator
+ * \brief Construct from a num and a den
  *
  * The fraction is automatically canonicalized, i.e. reduced to the irreducible
  * form.
  */
 template<typename Unsigned>
-Fraction<Unsigned>::Fraction(const Unsigned& numerator, const Unsigned& denominator)
-  : _num(numerator),
-    _den(denominator)
+Fraction<Unsigned>::Fraction(const Unsigned& num, const Unsigned& den)
+  : _num(num),
+    _den(den)
 {
-  if (Unsigned divisor = detail::gcd(numerator, denominator)) {
-    _num = numerator / divisor;
-    _den = denominator / divisor;
+  if (Unsigned divisor = detail::gcd(num, den)) {
+    _num = num / divisor;
+    _den = den / divisor;
   }
 }
 
@@ -110,8 +110,8 @@ Fraction<Unsigned>::Fraction(std::size_t repeats, int digit)
 template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::apply(const Fraction& other)
 {
-  bool overflow = _num *= other._num;
-  bool invalid = _den *= other._den;
+  bool overflow = _num *= other.num();
+  bool invalid = _den *= other.den();
 
   _den *= !(invalid || overflow);
   _num = _num | (overflow && !(invalid || _num));
@@ -197,11 +197,11 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator+=(const Fraction& other)
 {
   Fraction fraction(_den, other._den);
 
-  if (_den *= fraction._den) {
+  if (_den *= fraction.den()) {
     _num = 0;
   }
   else {
-    bool overflow = (_num *= fraction._den) || (fraction._num *= other._num) || (_num += fraction._num);
+    bool overflow = (_num *= fraction.den()) || (fraction._num *= other.num()) || (_num += fraction.num());
 
     _den *= !overflow;
     _num = _num | (overflow && !_num);
@@ -215,7 +215,7 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator-=(const Fraction& other)
 {
   Fraction fraction(_den, other._den);
 
-  bool invalid = (_den *= fraction._den) || (_num *= fraction._den) || (fraction._num *= other._num) || (_num -= fraction._num);
+  bool invalid = (_den *= fraction.den()) || (_num *= fraction.den()) || (fraction._num *= other.num()) || (_num -= fraction.num());
 
   _num *= !invalid;
   _den *= !invalid;
@@ -241,18 +241,18 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator/=(const Fraction& other)
 template<typename Unsigned>
 bool operator==(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
 {
-  return x.denominator() && x.denominator() == y.denominator() && x.numerator() == y.numerator();
+  return x.den() && x.den() == y.den() && x.num() == y.num();
 }
 
 template<typename Character, typename Unsigned>
 std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Fraction<Unsigned>& fraction)
 {
-  if (fraction.denominator() == 1)
-    return stream << fraction.numerator();
-  else if (fraction.denominator())
-    return stream << '(' << fraction.numerator() << '/' << fraction.denominator() << ')';
+  if (fraction.den() == 1)
+    return stream << fraction.num();
+  else if (fraction.den())
+    return stream << '(' << fraction.num() << '/' << fraction.den() << ')';
   else
-    return stream << (fraction.numerator() ? "inf" : "nan");
+    return stream << (fraction.num() ? "inf" : "nan");
 }
 
 } // namespace Chic
@@ -262,7 +262,7 @@ namespace std {
 template<typename Unsigned>
 bool isfinite(const Chic::Fraction<Unsigned>& fraction)
 {
-  return fraction.denominator();
+  return fraction.den();
 }
 
 template<typename Unsigned>
@@ -270,9 +270,9 @@ struct hash<Chic::Fraction<Unsigned>>
 {
   std::size_t operator()(const Chic::Fraction<Unsigned>& fraction) const
   {
-    Chic::Integer<std::size_t> numerator = fraction.numerator();
+    Chic::Integer<std::size_t> num = fraction.num();
 
-    return Chic::rotate(numerator, (std::numeric_limits<std::size_t>::digits / 2)) ^ fraction.denominator();
+    return Chic::rotate(num, (std::numeric_limits<std::size_t>::digits / 2)) ^ fraction.den();
   }
 };
 
