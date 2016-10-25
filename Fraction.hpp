@@ -18,6 +18,7 @@
 #ifndef CHIC_FRACTION_HPP
 #define CHIC_FRACTION_HPP
 
+#include "Factorial.hpp"
 #include "Integer.hpp"
 
 namespace Chic {
@@ -151,7 +152,7 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 {
   Fraction result;
 
-  result._num = Integer<Unsigned>(_num).factorial().value();
+  result._num = Chic::factorial(_num);
   result._den = !!result._num;
   result._num = result._num | (_den == 1 && !result._num);
 

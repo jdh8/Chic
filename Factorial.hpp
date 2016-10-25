@@ -55,6 +55,14 @@ Integer Factorial<Integer>::operator()(Integer n) const
   return n < _table.size() ? _table[n] : 0;
 }
 
+template<typename Integer>
+Integer factorial(Overflow<Integer> n)
+{
+  static const Factorial<Integer> implementation;
+
+  return implementation(n);
+}
+
 } // namespace Chic
 
 #endif // CHIC_FACTORIAL_HPP
