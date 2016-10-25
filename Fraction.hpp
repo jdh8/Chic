@@ -271,7 +271,7 @@ struct hash<Chic::Fraction<Unsigned>>
 {
   std::size_t operator()(const Chic::Fraction<Unsigned>& fraction) const
   {
-    Chic::Integer<std::size_t> num = fraction.num();
+    std::size_t num = fraction.num();
 
     return Chic::rotate(num, (std::numeric_limits<std::size_t>::digits / 2)) ^ fraction.den();
   }
