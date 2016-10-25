@@ -26,6 +26,9 @@
 
 namespace Chic {
 
+template<typename>
+class Fraction;
+
 template<typename Number>
 class Dictionary
 {
@@ -49,8 +52,8 @@ class Dictionary
     template<typename Unsigned>
     void pow(const Integer<Unsigned>&, const Integer<Unsigned>&);
 
-    template<typename Default>
-    void pow(const Default&, const Default&);
+    template<typename Unsigned>
+    void pow(const Fraction<Unsigned>&, const Fraction<Unsigned>&);
 
     void binary(const Number&, const Number&);
 
@@ -165,14 +168,14 @@ void Dictionary<Number>::pow(const Integer<Unsigned>& x, const Integer<Unsigned>
 }
 
 template<typename Number>
-template<typename Default>
-void Dictionary<Number>::pow(const Default& x, const Default& y)
+template<typename Unsigned>
+void Dictionary<Number>::pow(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
 {
-  if (y.den() == 1 && y.num() <= 64 && x && x.num() != x.den()) {
+  if (y.den() == 1 && y.num() < std::numeric_limits<Unsigned>::digits && x && x.num() != x.den()) {
     int shift = detail::ctz(y.num());
     auto odd = y.num() >> shift;
-    Default base = x.pow(odd);
-    Default sqrt = base.sqrt();
+    Fraction<Unsigned> base = x.pow(odd);
+    Fraction<Unsigned> sqrt = base.sqrt();
 
     quadratic(sqrt, { x, y, shift + 2 });
     quadratic(sqrt.inverse(), { x, y, -(shift + 2) });
