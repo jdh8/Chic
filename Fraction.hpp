@@ -93,7 +93,7 @@ Fraction<Unsigned>::Fraction(const Unsigned& num, const Unsigned& den)
   : _num(num),
     _den(den)
 {
-  if (Unsigned divisor = detail::gcd(num, den)) {
+  if (Unsigned divisor = gcd(num, den)) {
     _num = num / divisor;
     _den = den / divisor;
   }

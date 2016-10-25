@@ -227,6 +227,24 @@ Integer<Unsigned> Integer<Unsigned>::factorial(const Integer& lesser) const
 
 namespace detail {
 
+template<typename Integer>
+Integer abs(Integer x, std::false_type)
+{
+  return x;
+}
+
+template<typename Integer>
+typename std::make_unsigned<Integer>::type abs(Integer x, std::true_type)
+{
+  return std::abs(x);
+}
+
+template<typename Integer>
+typename std::make_unsigned<Integer>::type abs(Integer x)
+{
+  return abs(x, std::integral_constant<bool, std::numeric_limits<Integer>::is_signed>());
+}
+
 inline
 int ctz(unsigned int x)
 {
@@ -282,18 +300,14 @@ Unsigned gcd(Unsigned x, Unsigned y)
 
 } // namespace detail
 
-template<typename Unsigned>
-Integer<Unsigned> gcd(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+template<typename T>
+T gcd(T x, T y)
 {
-  return detail::gcd(x.value(), y.value());
+  return detail::gcd(detail::abs(x), detail::abs(y));
 }
 
-template<typename Signed>
-void rotate(Overflow<Signed, true>, int);
-// No definition as a compiler trap
-
 template<typename Unsigned>
-Unsigned rotate(Overflow<Unsigned, false> x, int shift)
+Unsigned rotate(Unsigned x, int shift, std::false_type)
 {
   const int digits = std::numeric_limits<Unsigned>::digits;
   const unsigned int mask = digits - 1;
@@ -306,7 +320,7 @@ Unsigned rotate(Overflow<Unsigned, false> x, int shift)
 template<typename Unsigned>
 Unsigned rotate(Unsigned x, int shift)
 {
-  return rotate(Overflow<Unsigned>(x), shift);
+  return rotate(x, shift, std::integral_constant<bool, std::numeric_limits<Unsigned>::is_signed>());
 }
 
 } // namespace Chic
