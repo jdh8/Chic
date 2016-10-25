@@ -50,10 +50,10 @@ class Dictionary
     void divides(const Default&, const Default&);
 
     template<typename Unsigned>
-    void pow(const Integer<Unsigned>&, const Integer<Unsigned>&);
+    void pow(Integer<Unsigned>, Integer<Unsigned>);
 
     template<typename Unsigned>
-    void pow(const Fraction<Unsigned>&, const Fraction<Unsigned>&);
+    void pow(Fraction<Unsigned>, Fraction<Unsigned>);
 
     void binary(const Number&, const Number&);
 
@@ -162,25 +162,45 @@ void Dictionary<Number>::divides(const Default& x, const Default& y)
 
 template<typename Number>
 template<typename Unsigned>
-void Dictionary<Number>::pow(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+void Dictionary<Number>::pow(Integer<Unsigned> x, Integer<Unsigned> y)
 {
-  quadratic(x.pow(y), { x, y, '^' });
+  if (x > 1 && y && y < std::numeric_limits<Unsigned>::digits)
+  {
+    int shift = detail::ctz(y.value());
+    auto odd = y >> shift;
+
+    Integer<Unsigned> base = x.pow(odd);
+    Integer<Unsigned> sqrt = base.sqrt();
+
+    quadratic(sqrt, { x, y, shift + 2 });
+
+    while (shift >= 0 && base)
+    {
+      push(base, { x, y, shift + 1 });
+
+      base *= base;
+      --shift;
+    }
+  }
 }
 
 template<typename Number>
 template<typename Unsigned>
-void Dictionary<Number>::pow(const Fraction<Unsigned>& x, const Fraction<Unsigned>& y)
+void Dictionary<Number>::pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
 {
-  if (y.den() == 1 && y.num() < std::numeric_limits<Unsigned>::digits && x && x.num() != x.den()) {
+  if (y.den() == 1 && y.num() < std::numeric_limits<Unsigned>::digits && x && x.num() != x.den())
+  {
     int shift = detail::ctz(y.num());
     auto odd = y.num() >> shift;
+
     Fraction<Unsigned> base = x.pow(odd);
     Fraction<Unsigned> sqrt = base.sqrt();
 
     quadratic(sqrt, { x, y, shift + 2 });
     quadratic(sqrt.inverse(), { x, y, -(shift + 2) });
 
-    while (shift >= 0 && base) {
+    while (shift >= 0 && base)
+    {
       push(base, { x, y, shift + 1 });
       push(base.inverse(), { x, y, -(shift + 1) });
 
