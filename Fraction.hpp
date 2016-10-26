@@ -140,7 +140,7 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
   
   bool valid = (result._num * result._num == _num) && (result._den * result._den == _den);
 
-  result._num *= valid;
+  result._num *= valid || !_den;
   result._den *= valid;
 
   return result;
