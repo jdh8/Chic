@@ -118,6 +118,20 @@ Fraction<Unsigned>::operator bool() const
 }
 
 template<typename Unsigned>
+Fraction<Unsigned>& Fraction<Unsigned>::operator++()
+{
+  _num = num() + den();
+  return *this;
+}
+
+template<typename Unsigned>
+Fraction<Unsigned>& Fraction<Unsigned>::operator--()
+{
+  _num = num() - den();
+  return *this;
+}
+
+template<typename Unsigned>
 Fraction<Unsigned>& Fraction<Unsigned>::apply(Fraction other)
 {
   bool overflow = _num *= other.num();
@@ -214,20 +228,6 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(Fraction exponent) const
     return pow(exponent.num());
   else
     return { 0, 0 };
-}
-
-template<typename Unsigned>
-Fraction<Unsigned>& Fraction<Unsigned>::operator++()
-{
-  _num = num() + den();
-  return *this;
-}
-
-template<typename Unsigned>
-Fraction<Unsigned>& Fraction<Unsigned>::operator--()
-{
-  _num = num() - den();
-  return *this;
 }
 
 template<typename Unsigned>
