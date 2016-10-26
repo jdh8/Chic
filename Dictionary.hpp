@@ -39,15 +39,15 @@ class Dictionary
     std::vector<std::vector<Number>> _hierarchy;
     const int _digit;
 
-    bool push(const Number&, const Expression<Number>&);
+    bool push(Number, Expression<Number>);
     void quadratic(Number, Expression<Number>);
     void factorial();
 
     template<typename Unsigned>
-    void divides(const Integer<Unsigned>&, const Integer<Unsigned>&);
+    void divides(Integer<Unsigned>, Integer<Unsigned>);
 
     template<typename Default>
-    void divides(const Default&, const Default&);
+    void divides(Default, Default);
 
     template<typename Unsigned>
     void pow(Integer<Unsigned>, Integer<Unsigned>);
@@ -55,19 +55,19 @@ class Dictionary
     template<typename Unsigned>
     void pow(Fraction<Unsigned>, Fraction<Unsigned>);
 
-    void binary(const Number&, const Number&);
+    void binary(Number, Number);
 
   public:
     Dictionary(int);
 
-    Expression<Number> operator[](const Number&) const;
+    Expression<Number> operator[](Number) const;
     const std::unordered_map<Number, Expression<Number>>& graph() const;
     const std::vector<std::vector<Number>>& hierarchy() const;
     int digit() const;
-    Resolver resolve(const Number&) const;
+    Resolver resolve(Number) const;
 
     void grow();
-    Expression<Number> build(const Number&, std::size_t limit = -1);
+    Expression<Number> build(Number, std::size_t limit = -1);
 };
 
 template<typename Number>
@@ -76,7 +76,7 @@ Dictionary<Number>::Dictionary(int digit)
 {}
 
 template<typename Number>
-Expression<Number> Dictionary<Number>::operator[](const Number& key) const
+Expression<Number> Dictionary<Number>::operator[](Number key) const
 {
   auto found = _graph.find(key);
 
@@ -105,7 +105,7 @@ int Dictionary<Number>::digit() const
 }
 
 template<typename Number>
-bool Dictionary<Number>::push(const Number& key, const Expression<Number>& expr)
+bool Dictionary<Number>::push(Number key, Expression<Number> expr)
 {
   bool status = key && _graph.emplace(key, expr).second;
 
@@ -144,7 +144,7 @@ void Dictionary<Number>::factorial()
 
 template<typename Number>
 template<typename Unsigned>
-void Dictionary<Number>::divides(const Integer<Unsigned>& x, const Integer<Unsigned>& y)
+void Dictionary<Number>::divides(Integer<Unsigned> x, Integer<Unsigned> y)
 {
   quadratic(x / y, { x, y, '/' });
   quadratic(y / x, { y, x, '/' });
@@ -152,7 +152,7 @@ void Dictionary<Number>::divides(const Integer<Unsigned>& x, const Integer<Unsig
 
 template<typename Number>
 template<typename Default>
-void Dictionary<Number>::divides(const Default& x, const Default& y)
+void Dictionary<Number>::divides(Default x, Default y)
 {
   Default quotient = x / y;
 
@@ -211,7 +211,7 @@ void Dictionary<Number>::pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
 }
 
 template<typename Number>
-void Dictionary<Number>::binary(const Number& x, const Number& y)
+void Dictionary<Number>::binary(Number x, Number y)
 {
   quadratic(x + y, { x, y, '+' });
   quadratic(x * y, { x, y, '*' });
@@ -245,7 +245,7 @@ void Dictionary<Number>::grow()
 }
 
 template<typename Number>
-Expression<Number> Dictionary<Number>::build(const Number& key, std::size_t limit)
+Expression<Number> Dictionary<Number>::build(Number key, std::size_t limit)
 {
   while (_hierarchy.size() < limit) {
     if (auto found = operator[](key))
@@ -257,7 +257,7 @@ Expression<Number> Dictionary<Number>::build(const Number& key, std::size_t limi
 }
 
 template<typename Number>
-typename Dictionary<Number>::Resolver Dictionary<Number>::resolve(const Number& key) const
+typename Dictionary<Number>::Resolver Dictionary<Number>::resolve(Number key) const
 {
   return { *this, key };
 }
@@ -267,17 +267,17 @@ class Dictionary<Number>::Resolver : public IO<Dictionary<Number>::Resolver>
 {
   private:
     const Dictionary& _dict;
-    const Number& _key;
+    Number _key;
 
   public:
-    Resolver(const Dictionary&, const Number&);
+    Resolver(const Dictionary&, Number);
 
     template<typename Character>
     std::basic_ostream<Character>& operator()(std::basic_ostream<Character>&) const;
 };
 
 template<typename Number>
-Dictionary<Number>::Resolver::Resolver(const Dictionary& dict, const Number& key)
+Dictionary<Number>::Resolver::Resolver(const Dictionary& dict, Number key)
   : _dict(dict),
     _key(key)
 {}
@@ -286,7 +286,7 @@ template<typename Number>
 template<typename Character>
 std::basic_ostream<Character>& Dictionary<Number>::Resolver::operator()(std::basic_ostream<Character>& stream) const
 {
-  const auto& expr = _dict[_key];
+  auto expr = _dict[_key];
 
   if (expr.symbol()) {
     stream << _key << " = " << expr << '\n' << Resolver(_dict, expr.first());

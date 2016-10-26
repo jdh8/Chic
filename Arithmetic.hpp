@@ -25,10 +25,10 @@ namespace Chic {
 template<typename Derived>
 struct Arithmetic
 {
-  friend Derived operator+(Derived x, const Derived& y) { return x += y; }
-  friend Derived operator-(Derived x, const Derived& y) { return x -= y; }
-  friend Derived operator*(Derived x, const Derived& y) { return x *= y; }
-  friend Derived operator/(Derived x, const Derived& y) { return x /= y; }
+  friend Derived operator+(Derived x, Derived y) { return x += y; }
+  friend Derived operator-(Derived x, Derived y) { return x -= y; }
+  friend Derived operator*(Derived x, Derived y) { return x *= y; }
+  friend Derived operator/(Derived x, Derived y) { return x /= y; }
 };
 
 } // namespace Chic

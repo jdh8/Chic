@@ -32,36 +32,36 @@ class Expression
     int _symbol;
 
   public:
-    Expression(const Index& = {}, int = 0);
-    Expression(const Index&, const Index&, int);
+    Expression(Index = {}, int = 0);
+    Expression(Index, Index, int);
 
-    const Index& first() const;
-    const Index& second() const;
+    Index first() const;
+    Index second() const;
     int symbol() const;
     operator bool() const;
 };
 
 template<typename Index>
-Expression<Index>::Expression(const Index& first, int symbol)
+Expression<Index>::Expression(Index first, int symbol)
   : _first(first),
     _symbol(symbol)
 {}
 
 template<typename Index>
-Expression<Index>::Expression(const Index& first, const Index& second, int symbol)
+Expression<Index>::Expression(Index first, Index second, int symbol)
   : _first(first),
     _second(second),
     _symbol(symbol)
 {}
 
 template<typename Index>
-const Index& Expression<Index>::first() const
+Index Expression<Index>::first() const
 {
   return _first;
 }
 
 template<typename Index>
-const Index& Expression<Index>::second() const
+Index Expression<Index>::second() const
 {
   return _second;
 }
@@ -79,7 +79,7 @@ Expression<Index>::operator bool() const
 }
 
 template<typename Character, typename Index>
-std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, const Expression<Index>& expr)
+std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, Expression<Index> expr)
 {
   if (expr.second()) {
     int shift = std::abs(expr.symbol()) - 1;

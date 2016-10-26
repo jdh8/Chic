@@ -32,7 +32,7 @@ class Integer : public Arithmetic<Integer<Unsigned>>
     Overflow<Unsigned> _value;
 
   public:
-    Integer(const Unsigned& = 0);
+    Integer(Unsigned = 0);
     Integer(std::size_t, int);
 
     operator Unsigned() const;
@@ -52,7 +52,7 @@ class Integer : public Arithmetic<Integer<Unsigned>>
 };
 
 template<typename Unsigned>
-Integer<Unsigned>::Integer(const Unsigned& value)
+Integer<Unsigned>::Integer(Unsigned value)
   : _value(value)
 {}
 
