@@ -19,7 +19,7 @@
 #define CHIC_EXPRESSION_HPP
 
 #include <iosfwd>
-#include <cmath>
+#include <cstdlib>
 
 namespace Chic {
 
