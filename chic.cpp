@@ -6,7 +6,7 @@
 #include <cstdint>
 
 template<typename Wrapper, typename Unsigned>
-static std::size_t find(const Unsigned& target, int digit, std::size_t limit = -1)
+static std::size_t find(Unsigned target, int digit, std::size_t limit = -1)
 {
   Chic::Dictionary<Wrapper> dictionary(digit);
 
@@ -22,13 +22,13 @@ static std::size_t find(const Unsigned& target, int digit, std::size_t limit = -
 }
 
 template<typename Unsigned>
-static void find(const Unsigned& target, int digit)
+static void find(Unsigned target, int digit)
 {
   find<Chic::Fraction<Unsigned>>(target, digit, find<Chic::Integer<Unsigned>>(target, digit));
 }
 
 template<typename Unsigned>
-static void run(const Unsigned& target)
+static void run(Unsigned target)
 {
   for (int digit = 1; digit <= 9; ++digit)
     find(target, digit);
