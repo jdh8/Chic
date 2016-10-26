@@ -18,152 +18,11 @@
 #ifndef CHIC_INTEGER_HPP
 #define CHIC_INTEGER_HPP
 
-#include "Arithmetic.hpp"
-#include "Overflow.hpp"
-#include "Factorial.hpp"
-#include <cmath>
+#include <limits>
+#include <type_traits>
+#include <cstdlib>
 
 namespace Chic {
-
-template<typename Unsigned>
-class Integer : public Arithmetic<Integer<Unsigned>>
-{
-  private:
-    Overflow<Unsigned> _value;
-
-  public:
-    Integer(Unsigned = 0);
-    Integer(std::size_t, int);
-
-    operator Unsigned() const;
-    Unsigned value() const;
-
-    Integer& operator*=(bool);
-
-    Integer& operator+=(Integer);
-    Integer& operator-=(Integer);
-    Integer& operator*=(Integer);
-    Integer& operator/=(Integer);
-
-    Integer pow(Unsigned) const;
-    Integer sqrt() const;
-    Integer factorial() const;
-    Integer factorial(Integer) const;
-};
-
-template<typename Unsigned>
-Integer<Unsigned>::Integer(Unsigned value)
-  : _value(value)
-{}
-
-template<typename Unsigned>
-Integer<Unsigned>::Integer(std::size_t repeats, int digit)
-  : _value(0)
-{
-  while (repeats--)
-    _value = 10 * _value + digit;
-}
-
-template<typename Unsigned>
-Integer<Unsigned>::operator Unsigned() const
-{
-  return _value;
-}
-
-template<typename Unsigned>
-Unsigned Integer<Unsigned>::value() const
-{
-  return _value;
-}
-
-template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator*=(bool condition)
-{
-  _value *= condition;
-  return *this;
-}
-
-template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator+=(Integer other)
-{
-  bool overflow = _value += other.value();
-  _value *= !overflow;
-  return *this;
-}
-
-template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator-=(Integer other)
-{
-  bool underflow = _value -= other.value();
-  _value *= !underflow;
-  return *this;
-}
-
-template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator*=(Integer other)
-{
-  bool overflow = _value *= other.value();
-  _value *= !overflow;
-  return *this;
-}
-
-template<typename Unsigned>
-Integer<Unsigned>& Integer<Unsigned>::operator/=(Integer other)
-{
-  Unsigned result = _value / other._value;
-  _value = result * (other._value * result == _value);
-  return *this;
-}
-
-template<typename Unsigned, typename Other>
-Integer<Unsigned> operator*(Integer<Unsigned> x, Other other)
-{
-  return x *= other;
-}
-
-template<typename Unsigned>
-Integer<Unsigned> operator*(bool condition, Integer<Unsigned> x)
-{
-  return x *= condition;
-}
-
-template<typename Unsigned>
-Integer<Unsigned> Integer<Unsigned>::pow(Unsigned exponent) const
-{
-  Integer base = *this;
-  Integer result = 1;
-
-  for (; exponent; exponent >>= 1) {
-    if (exponent & 1)
-      result *= base;
-    base *= base;
-  }
-  return result;
-}
-
-template<typename Unsigned>
-Integer<Unsigned> Integer<Unsigned>::sqrt() const
-{
-  Unsigned result = std::sqrt(value());
-  return (result * result == value()) * result;
-}
-
-template<typename Unsigned>
-Integer<Unsigned> Integer<Unsigned>::factorial() const
-{
-  return Chic::factorial(_value);
-}
-
-template<typename Unsigned>
-Integer<Unsigned> Integer<Unsigned>::factorial(Integer lesser) const
-{
-  Integer result = *this >= lesser;
-
-  for (Integer multiplier = _value; multiplier > lesser; --multiplier)
-    result *= multiplier;
-
-  return result;
-}
 
 namespace detail {
 
@@ -264,15 +123,5 @@ Unsigned rotate(Unsigned x, int shift)
 }
 
 } // namespace Chic
-
-namespace std {
-
-template<typename Unsigned>
-struct hash<Chic::Integer<Unsigned>>
-{
-  std::size_t operator()(const Chic::Integer<Unsigned>& x) const { return x; }
-};
-
-} // namespace std
 
 #endif // CHIC_INTEGER_HPP

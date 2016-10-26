@@ -18,7 +18,6 @@
 #ifndef CHIC_DICTIONARY_HPP
 #define CHIC_DICTIONARY_HPP
 
-#include "Expression.hpp"
 #include "IO.hpp"
 #include "Integer.hpp"
 #include <unordered_map>
@@ -26,8 +25,9 @@
 
 namespace Chic {
 
-template<typename>
-class Fraction;
+template<typename> class Expression;
+template<typename> class Entry;
+template<typename> class Fraction;
 
 template<typename Number>
 class Dictionary
@@ -44,13 +44,13 @@ class Dictionary
     void factorial();
 
     template<typename Unsigned>
-    void divides(Integer<Unsigned>, Integer<Unsigned>);
+    void divides(Entry<Unsigned>, Entry<Unsigned>);
 
     template<typename Default>
     void divides(Default, Default);
 
     template<typename Unsigned>
-    void pow(Integer<Unsigned>, Integer<Unsigned>);
+    void pow(Entry<Unsigned>, Entry<Unsigned>);
 
     template<typename Unsigned>
     void pow(Fraction<Unsigned>, Fraction<Unsigned>);
@@ -144,7 +144,7 @@ void Dictionary<Number>::factorial()
 
 template<typename Number>
 template<typename Unsigned>
-void Dictionary<Number>::divides(Integer<Unsigned> x, Integer<Unsigned> y)
+void Dictionary<Number>::divides(Entry<Unsigned> x, Entry<Unsigned> y)
 {
   quadratic(x / y, { x, y, '/' });
   quadratic(y / x, { y, x, '/' });
@@ -162,15 +162,15 @@ void Dictionary<Number>::divides(Default x, Default y)
 
 template<typename Number>
 template<typename Unsigned>
-void Dictionary<Number>::pow(Integer<Unsigned> x, Integer<Unsigned> y)
+void Dictionary<Number>::pow(Entry<Unsigned> x, Entry<Unsigned> y)
 {
   if (x > 1 && y && y < std::numeric_limits<Unsigned>::digits)
   {
     int shift = detail::ctz(y.value());
     auto odd = y >> shift;
 
-    Integer<Unsigned> base = x.pow(odd);
-    Integer<Unsigned> sqrt = base.sqrt();
+    Entry<Unsigned> base = x.pow(odd);
+    Entry<Unsigned> sqrt = base.sqrt();
 
     quadratic(sqrt, { x, y, shift + 2 });
 

@@ -1,6 +1,7 @@
 #include "Dictionary.hpp"
+#include "Entry.hpp"
+#include "Expression.hpp"
 #include "Fraction.hpp"
-#include <future>
 #include <iostream>
 #include <sstream>
 #include <cstdint>
@@ -24,7 +25,7 @@ static std::size_t find(Unsigned target, int digit, std::size_t limit = -1)
 template<typename Unsigned>
 static void find(Unsigned target, int digit)
 {
-  find<Chic::Fraction<Unsigned>>(target, digit, find<Chic::Integer<Unsigned>>(target, digit));
+  find<Chic::Fraction<Unsigned>>(target, digit, find<Chic::Entry<Unsigned>>(target, digit));
 }
 
 template<typename Unsigned>
