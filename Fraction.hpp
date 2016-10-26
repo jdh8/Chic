@@ -54,6 +54,7 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     explicit operator bool() const;
 
     Fraction& apply(Fraction);
+    Fraction& canonicalize();
 
     Fraction inverse() const;
     Fraction sqrt() const;
@@ -86,10 +87,7 @@ Fraction<Unsigned>::Fraction(Unsigned num, Unsigned den)
   : _num(num),
     _den(den)
 {
-  if (Unsigned divisor = gcd(num, den)) {
-    _num = num / divisor;
-    _den = den / divisor;
-  }
+  canonicalize();
 }
 
 template<typename Unsigned>
@@ -127,6 +125,17 @@ Fraction<Unsigned>& Fraction<Unsigned>::apply(Fraction other)
 
   _den *= !(invalid || overflow);
   _num = _num | (overflow && !(invalid || _num));
+
+  return *this;
+}
+
+template<typename Unsigned>
+Fraction<Unsigned>& Fraction<Unsigned>::canonicalize()
+{
+  if (Unsigned divisor = gcd(num(), den())) {
+    _num = num() / divisor;
+    _den = den() / divisor;
+  }
 
   return *this;
 }
