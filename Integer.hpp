@@ -86,21 +86,24 @@ Integer<Unsigned>& Integer<Unsigned>::operator*=(bool condition)
 template<typename Unsigned>
 Integer<Unsigned>& Integer<Unsigned>::operator+=(Integer other)
 {
-  _value *= !(_value += other.value());
+  bool overflow = _value += other.value();
+  _value *= !overflow;
   return *this;
 }
 
 template<typename Unsigned>
 Integer<Unsigned>& Integer<Unsigned>::operator-=(Integer other)
 {
-  _value *= !(_value -= other.value());
+  bool underflow = _value -= other.value();
+  _value *= !underflow;
   return *this;
 }
 
 template<typename Unsigned>
 Integer<Unsigned>& Integer<Unsigned>::operator*=(Integer other)
 {
-  _value *= !(_value *= other.value());
+  bool overflow = _value *= other.value();
+  _value *= !overflow;
   return *this;
 }
 
@@ -108,9 +111,7 @@ template<typename Unsigned>
 Integer<Unsigned>& Integer<Unsigned>::operator/=(Integer other)
 {
   Unsigned result = _value / other._value;
-
   _value = result * (other._value * result == _value);
-
   return *this;
 }
 
