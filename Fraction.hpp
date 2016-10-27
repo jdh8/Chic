@@ -212,7 +212,7 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(Unsigned exponent) const
 
   for (; exponent; exponent >>= 1) {
     if (exponent & 1)
-      result = result.square();
+      result._apply(base);
     base = base.square();
   }
   return result;
