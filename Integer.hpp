@@ -18,10 +18,13 @@
 #ifndef CHIC_INTEGER_HPP
 #define CHIC_INTEGER_HPP
 
+#include <bitset>
 #include <limits>
 #include <utility>
 
 namespace Chic {
+
+#ifdef __GNUC__
 
 inline
 int ctz(unsigned int x)
@@ -41,6 +44,16 @@ int ctz(unsigned long long x)
   return __builtin_ctzll(x);
 }
 
+#endif // __GNUC__
+
+template<typename Unsigned>
+int ctz(Unsigned x)
+{
+  std::bitset<std::numeric_limits<Unsigned>::digits> bitset = (x & -x) - 1;
+
+  return bitset.count();
+}
+
 #ifdef __BMI__
 
 template<typename Unsigned>
@@ -52,7 +65,8 @@ Unsigned gcd(Unsigned x, Unsigned y)
 
   x >>= ctz(x);
 
-  while (y) {
+  while (y)
+  {
     y >>= ctz(y);
     if (x > y) std::swap(x, y);
     y -= x;
@@ -66,7 +80,8 @@ Unsigned gcd(Unsigned x, Unsigned y)
 template<typename Unsigned>
 Unsigned gcd(Unsigned x, Unsigned y)
 {
-  while (y) {
+  while (y)
+  {
     x %= y;
     std::swap(x, y);
   }
