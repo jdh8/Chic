@@ -61,8 +61,7 @@ class Dictionary
     Dictionary(int);
 
     Expression<Number> operator[](Number) const;
-    const std::unordered_map<Number, Expression<Number>>& graph() const;
-    const std::vector<std::vector<Number>>& hierarchy() const;
+    std::size_t level() const;
     int digit() const;
     Resolver resolve(Number) const;
 
@@ -87,15 +86,9 @@ Expression<Number> Dictionary<Number>::operator[](Number key) const
 }
 
 template<typename Number>
-const std::unordered_map<Number, Expression<Number>>& Dictionary<Number>::graph() const
+std::size_t Dictionary<Number>::level() const
 {
-  return _graph;
-}
-
-template<typename Number>
-const std::vector<std::vector<Number>>& Dictionary<Number>::hierarchy() const
-{
-  return _hierarchy;
+  return _hierarchy.size();
 }
 
 template<typename Number>
