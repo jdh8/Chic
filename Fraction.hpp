@@ -41,6 +41,7 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
 
     Fraction& operator++();
     Fraction& operator--();
+    Fraction& _apply(Fraction);
 
   public:
     Fraction();
@@ -53,11 +54,9 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
 
     explicit operator bool() const;
 
-    Fraction& apply(Fraction);
-    Fraction& canonicalize();
-
     Fraction inverse() const;
     Fraction sqrt() const;
+    Fraction square() const;
 
     Fraction factorial() const;
     Fraction factorial(Fraction) const;
@@ -87,7 +86,10 @@ Fraction<Unsigned>::Fraction(Unsigned num, Unsigned den)
   : _num(num),
     _den(den)
 {
-  canonicalize();
+  if (Unsigned divisor = gcd(num, den)) {
+    _num = num / divisor;
+    _den = den / divisor;
+  }
 }
 
 template<typename Unsigned>
@@ -132,24 +134,13 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator--()
 }
 
 template<typename Unsigned>
-Fraction<Unsigned>& Fraction<Unsigned>::apply(Fraction other)
+Fraction<Unsigned>& Fraction<Unsigned>::_apply(Fraction other)
 {
   bool overflow = _num *= other.num();
   bool invalid = _den *= other.den();
 
   _den *= !(invalid || overflow);
   _num = _num | (overflow && !(invalid || _num));
-
-  return *this;
-}
-
-template<typename Unsigned>
-Fraction<Unsigned>& Fraction<Unsigned>::canonicalize()
-{
-  if (Unsigned divisor = gcd(num(), den())) {
-    _num = num() / divisor;
-    _den = den() / divisor;
-  }
 
   return *this;
 }
@@ -182,6 +173,12 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 }
 
 template<typename Unsigned>
+Fraction<Unsigned> Fraction<Unsigned>::square() const
+{
+  return Fraction(*this)._apply(*this);
+}
+
+template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 {
   Fraction result;
@@ -200,7 +197,7 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial(Fraction lesser) const
 
   if (den() && den() == lesser.den() && num() >= lesser.num() && !((num() - lesser.num()) % den()))
     for (Fraction multiplier = *this; num() > lesser.num(); --multiplier)
-      result.apply(multiplier);
+      result._apply(multiplier);
   else
     result._den = result._num = 0;
 
@@ -215,8 +212,8 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(Unsigned exponent) const
 
   for (; exponent; exponent >>= 1) {
     if (exponent & 1)
-      result.apply(base);
-    base.apply(base);
+      result = result.square();
+    base = base.square();
   }
   return result;
 }
@@ -267,7 +264,7 @@ Fraction<Unsigned>& Fraction<Unsigned>::operator*=(Fraction other)
   Fraction a(num(), other.den());
   Fraction b(other.num(), den());
 
-  return *this = a.apply(b);
+  return *this = a._apply(b);
 }
 
 template<typename Unsigned>

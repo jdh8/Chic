@@ -175,7 +175,7 @@ void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
       _basic(base, { x, y, shift + 1 });
       _basic(base.inverse(), { x, y, -(shift + 1) });
 
-      base.apply(base);
+      base = base.square();
       --shift;
     }
   }
