@@ -137,7 +137,7 @@ void Dictionary<Key>::_pow(Entry<Unsigned> x, Entry<Unsigned> y)
 {
   if (x > 1 && y && y < std::numeric_limits<Unsigned>::digits)
   {
-    int shift = detail::ctz(y.value());
+    int shift = ctz(y.value());
     Unsigned odd = y >> shift;
 
     Entry<Unsigned> base = x.pow(odd);
@@ -161,7 +161,7 @@ void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
 {
   if (y.den() == 1 && y.num() < std::numeric_limits<Unsigned>::digits && x && x.num() != x.den())
   {
-    int shift = detail::ctz(y.num());
+    int shift = ctz(y.num());
     Unsigned odd = y.num() >> shift;
 
     Fraction<Unsigned> base = x.pow(odd);

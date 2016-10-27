@@ -19,30 +19,9 @@
 #define CHIC_INTEGER_HPP
 
 #include <limits>
-#include <type_traits>
-#include <cstdlib>
+#include <utility>
 
 namespace Chic {
-
-namespace detail {
-
-template<typename Integer>
-Integer abs(Integer x, std::false_type)
-{
-  return x;
-}
-
-template<typename Integer>
-typename std::make_unsigned<Integer>::type abs(Integer x, std::true_type)
-{
-  return std::abs(x);
-}
-
-template<typename Integer>
-typename std::make_unsigned<Integer>::type abs(Integer x)
-{
-  return abs(x, std::integral_constant<bool, std::numeric_limits<Integer>::is_signed>());
-}
 
 inline
 int ctz(unsigned int x)
@@ -97,16 +76,8 @@ Unsigned gcd(Unsigned x, Unsigned y)
 
 #endif // __BMI__
 
-} // namespace detail
-
-template<typename T>
-T gcd(T x, T y)
-{
-  return detail::gcd(detail::abs(x), detail::abs(y));
-}
-
 template<typename Unsigned>
-Unsigned rotate(Unsigned x, int shift, std::false_type)
+Unsigned rotate(Unsigned x, int shift)
 {
   const int digits = std::numeric_limits<Unsigned>::digits;
   const unsigned int mask = digits - 1;
@@ -114,12 +85,6 @@ Unsigned rotate(Unsigned x, int shift, std::false_type)
   static_assert((digits & -digits) == digits, "Digits must be a power of 2 to perform circular shift.");
 
   return (x << shift) | (x >> (-shift & mask));
-}
-
-template<typename Unsigned>
-Unsigned rotate(Unsigned x, int shift)
-{
-  return rotate(x, shift, std::integral_constant<bool, std::numeric_limits<Unsigned>::is_signed>());
 }
 
 } // namespace Chic
