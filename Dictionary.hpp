@@ -33,7 +33,7 @@ template<typename Number>
 class Dictionary
 {
   private:
-    class Resolver;
+    class Tree;
 
     std::unordered_map<Number, Expression<Number>> _graph;
     std::vector<std::vector<Number>> _hierarchy;
@@ -63,7 +63,7 @@ class Dictionary
     Expression<Number> operator[](Number) const;
     std::size_t level() const;
     int digit() const;
-    Resolver resolve(Number) const;
+    Tree tree(Number) const;
 
     void grow();
     Expression<Number> build(Number, std::size_t limit = -1);
@@ -250,42 +250,42 @@ Expression<Number> Dictionary<Number>::build(Number key, std::size_t limit)
 }
 
 template<typename Number>
-typename Dictionary<Number>::Resolver Dictionary<Number>::resolve(Number key) const
+typename Dictionary<Number>::Tree Dictionary<Number>::tree(Number key) const
 {
   return { *this, key };
 }
 
 template<typename Number>
-class Dictionary<Number>::Resolver : public IO<Dictionary<Number>::Resolver>
+class Dictionary<Number>::Tree : public IO<Dictionary<Number>::Tree>
 {
   private:
     const Dictionary& _dict;
     Number _key;
 
   public:
-    Resolver(const Dictionary&, Number);
+    Tree(const Dictionary&, Number);
 
     template<typename Character>
     std::basic_ostream<Character>& operator()(std::basic_ostream<Character>&) const;
 };
 
 template<typename Number>
-Dictionary<Number>::Resolver::Resolver(const Dictionary& dict, Number key)
+Dictionary<Number>::Tree::Tree(const Dictionary& dict, Number key)
   : _dict(dict),
     _key(key)
 {}
 
 template<typename Number>
 template<typename Character>
-std::basic_ostream<Character>& Dictionary<Number>::Resolver::operator()(std::basic_ostream<Character>& stream) const
+std::basic_ostream<Character>& Dictionary<Number>::Tree::operator()(std::basic_ostream<Character>& stream) const
 {
   auto expr = _dict[_key];
 
   if (expr.symbol()) {
-    stream << _key << " = " << expr << '\n' << Resolver(_dict, expr.first());
+    stream << _key << " = " << expr << '\n' << Tree(_dict, expr.first());
 
     if (expr.second())
-      stream << Resolver(_dict, expr.second());
+      stream << Tree(_dict, expr.second());
   }
 
   return stream;

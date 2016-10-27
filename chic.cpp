@@ -14,7 +14,7 @@ static std::size_t find(Unsigned target, int digit, std::size_t limit = -1)
   if (dictionary.build(target, limit)) {
     std::cout << target << '#' << digit << ": "
       << dictionary.level() << " digits used\n--------------------\n"
-      << dictionary.resolve(target) << std::endl;
+      << dictionary.tree(target) << std::endl;
 
     return dictionary.level();
   }
