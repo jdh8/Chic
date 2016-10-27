@@ -23,82 +23,82 @@
 
 namespace Chic {
 
-template<typename Index>
+template<typename Key>
 class Expression
 {
   private:
-    Index _first;
-    Index _second;
+    Key _first;
+    Key _second;
     int _symbol;
 
   public:
-    Expression(Index = {}, int = 0);
-    Expression(Index, Index, int);
+    Expression(Key = {}, int = 0);
+    Expression(Key, Key, int);
 
-    Index first() const;
-    Index second() const;
+    Key first() const;
+    Key second() const;
     int symbol() const;
     operator bool() const;
 };
 
-template<typename Index>
-Expression<Index>::Expression(Index first, int symbol)
+template<typename Key>
+Expression<Key>::Expression(Key first, int symbol)
   : _first(first),
     _symbol(symbol)
 {}
 
-template<typename Index>
-Expression<Index>::Expression(Index first, Index second, int symbol)
+template<typename Key>
+Expression<Key>::Expression(Key first, Key second, int symbol)
   : _first(first),
     _second(second),
     _symbol(symbol)
 {}
 
-template<typename Index>
-Index Expression<Index>::first() const
+template<typename Key>
+Key Expression<Key>::first() const
 {
   return _first;
 }
 
-template<typename Index>
-Index Expression<Index>::second() const
+template<typename Key>
+Key Expression<Key>::second() const
 {
   return _second;
 }
 
-template<typename Index>
-int Expression<Index>::symbol() const
+template<typename Key>
+int Expression<Key>::symbol() const
 {
   return _symbol;
 }
 
-template<typename Index>
-Expression<Index>::operator bool() const
+template<typename Key>
+Expression<Key>::operator bool() const
 {
   return !!_first;
 }
 
-template<typename Character, typename Index>
-std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, Expression<Index> expr)
+template<typename Character, typename Key>
+std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, Expression<Key> expression)
 {
-  if (expr.second()) {
-    int shift = std::abs(expr.symbol()) - 1;
+  if (expression.second()) {
+    int shift = std::abs(expression.symbol()) - 1;
 
     if (shift < ' ') {
       for (int k = 0; k < shift; ++k)
         stream << "√";
-      return stream << expr.first() << (expr.symbol() < 0 ? "^-" : "^") << expr.second();
+      return stream << expression.first() << (expression.symbol() < 0 ? "^-" : "^") << expression.second();
     }
 
-    return stream << expr.first() << ' ' << char(expr.symbol()) << ' ' << expr.second();
+    return stream << expression.first() << ' ' << char(expression.symbol()) << ' ' << expression.second();
   }
-  else switch (expr.symbol()) {
+  else switch (expression.symbol()) {
     case '!':
-      return stream << expr.first() << '!';
+      return stream << expression.first() << '!';
     case 's':
-      return stream << "√" << expr.first();
+      return stream << "√" << expression.first();
     default:
-      return stream << char(expr.symbol()) << expr.first();
+      return stream << char(expression.symbol()) << expression.first();
   }
 }
 

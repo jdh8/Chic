@@ -6,10 +6,10 @@
 #include <sstream>
 #include <cstdint>
 
-template<typename Wrapper, typename Unsigned>
+template<typename Key, typename Unsigned>
 static std::size_t find(Unsigned target, int digit, std::size_t limit = -1)
 {
-  Chic::Dictionary<Wrapper> dictionary(digit);
+  Chic::Dictionary<Key> dictionary(digit);
 
   if (dictionary.build(target, limit)) {
     std::cout << target << '#' << digit << ": "
