@@ -81,24 +81,41 @@ Expression<Key>::operator bool() const
 template<typename Character, typename Key>
 std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, Expression<Key> expression)
 {
-  if (expression.second()) {
-    int shift = std::abs(expression.symbol()) - 1;
+  Key first = expression.first();
+  Key second = expression.second();
+  int symbol = expression.symbol();
 
-    if (shift < ' ') {
+  if (second)
+  {
+    int shift = std::abs(symbol) - 1;
+
+    if (shift < ' ')
+    {
       for (int k = 0; k < shift; ++k)
         stream << "√";
-      return stream << expression.first() << (expression.symbol() < 0 ? "^-" : "^") << expression.second();
+      return stream << first << (symbol < 0 ? "^-" : "^") << second;
     }
 
-    return stream << expression.first() << ' ' << char(expression.symbol()) << ' ' << expression.second();
+    switch (symbol)
+    {
+      case '!':
+        return stream << first << "! / " << second << '!';
+      case '!' + 1:
+        return stream << '(' << first << "! + " << second << "!) / " << second << '!';
+      case '!' - 1:
+        return stream << '(' << first << "! - " << second << "!) / " << second << '!';
+      default:
+        return stream << first << ' ' << char(symbol) << ' ' << second;
+    }
   }
-  else switch (expression.symbol()) {
+  else switch (symbol)
+  {
     case '!':
-      return stream << expression.first() << '!';
+      return stream << first << '!';
     case 's':
-      return stream << "√" << expression.first();
+      return stream << "√" << first;
     default:
-      return stream << char(expression.symbol()) << expression.first();
+      return stream << char(symbol) << first;
   }
 }
 
