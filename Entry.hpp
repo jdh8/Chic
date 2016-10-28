@@ -40,15 +40,15 @@ class Entry : public Arithmetic<Entry<Unsigned>>
 
     Entry& operator*=(bool);
 
-    Entry& operator+=(Entry);
-    Entry& operator-=(Entry);
-    Entry& operator*=(Entry);
-    Entry& operator/=(Entry);
+    Entry& operator+=(Unsigned);
+    Entry& operator-=(Unsigned);
+    Entry& operator*=(Unsigned);
+    Entry& operator/=(Unsigned);
 
     Entry pow(Unsigned) const;
     Entry sqrt() const;
     Entry factorial() const;
-    Entry factorial(Entry) const;
+    Entry factorial(Unsigned) const;
 };
 
 template<typename Unsigned>
@@ -84,47 +84,35 @@ Entry<Unsigned>& Entry<Unsigned>::operator*=(bool condition)
 }
 
 template<typename Unsigned>
-Entry<Unsigned>& Entry<Unsigned>::operator+=(Entry other)
+Entry<Unsigned>& Entry<Unsigned>::operator+=(Unsigned other)
 {
-  bool overflow = _value += other.value();
+  bool overflow = _value += other;
   _value *= !overflow;
   return *this;
 }
 
 template<typename Unsigned>
-Entry<Unsigned>& Entry<Unsigned>::operator-=(Entry other)
+Entry<Unsigned>& Entry<Unsigned>::operator-=(Unsigned other)
 {
-  bool underflow = _value -= other.value();
+  bool underflow = _value -= other;
   _value *= !underflow;
   return *this;
 }
 
 template<typename Unsigned>
-Entry<Unsigned>& Entry<Unsigned>::operator*=(Entry other)
+Entry<Unsigned>& Entry<Unsigned>::operator*=(Unsigned other)
 {
-  bool overflow = _value *= other.value();
+  bool overflow = _value *= other;
   _value *= !overflow;
   return *this;
 }
 
 template<typename Unsigned>
-Entry<Unsigned>& Entry<Unsigned>::operator/=(Entry other)
+Entry<Unsigned>& Entry<Unsigned>::operator/=(Unsigned other)
 {
-  Unsigned result = _value / other._value;
-  _value = result * (other._value * result == _value);
+  Unsigned result = _value / other;
+  _value = result * (other * result == _value);
   return *this;
-}
-
-template<typename Unsigned, typename Other>
-Entry<Unsigned> operator*(Entry<Unsigned> x, Other other)
-{
-  return x *= other;
-}
-
-template<typename Unsigned>
-Entry<Unsigned> operator*(bool condition, Entry<Unsigned> x)
-{
-  return x *= condition;
 }
 
 template<typename Unsigned>
@@ -155,11 +143,11 @@ Entry<Unsigned> Entry<Unsigned>::factorial() const
 }
 
 template<typename Unsigned>
-Entry<Unsigned> Entry<Unsigned>::factorial(Entry lesser) const
+Entry<Unsigned> Entry<Unsigned>::factorial(Unsigned lesser) const
 {
-  Entry result = *this >= lesser;
+  Entry result = !!Chic::factorial(Overflow<Unsigned>(_value - lesser));
 
-  for (Entry multiplier = _value; multiplier > lesser; --multiplier)
+  for (Unsigned multiplier = _value; result && multiplier > lesser; --multiplier)
     result *= multiplier;
 
   return result;

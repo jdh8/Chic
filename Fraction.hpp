@@ -192,17 +192,15 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 }
 
 template<typename Unsigned>
-Fraction<Unsigned> Fraction<Unsigned>::factorial(Fraction lesser) const
+Fraction<Unsigned> Fraction<Unsigned>::factorial(Fraction other) const
 {
-  Fraction result = 1;
-
-  if (den() && den() == lesser.den() && num() >= lesser.num() && !((num() - lesser.num()) % den()))
-    for (Fraction multiplier = *this; num() > lesser.num(); --multiplier)
-      result._apply(multiplier);
-  else
-    result._den = result._num = 0;
-
-  return result;
+  if (den() == 1 && other.den() == 1) {
+    if (Unsigned integer = Entry<Unsigned>((std::max)(num(), other.num())).factorial((std::min)(num(), other.num()))) {
+      Fraction fraction(integer);
+      return num() > other.num() ? fraction : fraction.inverse();
+    }
+  }
+  return { 0, 0 };
 }
 
 template<typename Unsigned>

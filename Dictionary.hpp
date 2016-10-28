@@ -19,6 +19,7 @@
 #define CHIC_DICTIONARY_HPP
 
 #include "Integer.hpp"
+#include "Overflow.hpp"
 #include <queue>
 #include <stack>
 #include <unordered_map>
@@ -219,6 +220,9 @@ void Dictionary<Key>::_binary(Key x, Key y)
 
   _quadratic(x - y, { x, y, '-' });
   _quadratic(y - x, { y, x, '-' });
+
+  _quadratic(x.factorial(y), { x, y, '!' });
+  _quadratic(y.factorial(x), { y, x, '!' });
 
   _divides(x, y);
 
