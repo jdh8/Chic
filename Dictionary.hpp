@@ -29,6 +29,20 @@ template<typename> class Expression;
 template<typename> class Entry;
 template<typename> class Fraction;
 
+template<typename> struct Reservation;
+
+template<typename Unsigned>
+struct Reservation<Entry<Unsigned>>
+{
+  static const std::size_t size = std::size_t(std::numeric_limits<Unsigned>::digits) << 19;
+};
+
+template<typename Unsigned>
+struct Reservation<Fraction<Unsigned>>
+{
+  static const std::size_t size = std::size_t(std::numeric_limits<Unsigned>::digits) << 20;
+};
+
 template<typename Key>
 class Dictionary
 {
@@ -70,7 +84,8 @@ class Dictionary
 
 template<typename Key>
 Dictionary<Key>::Dictionary(int strain)
-  : digit(strain)
+  : _graph(Reservation<Key>::size),
+    digit(strain)
 {}
 
 template<typename Key>
