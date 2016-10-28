@@ -159,10 +159,13 @@ template<typename Key>
 template<typename Unsigned>
 void Dictionary<Key>::_pow(Entry<Unsigned> x, Entry<Unsigned> y)
 {
-  if (x > 1 && y && y < std::numeric_limits<Unsigned>::digits)
+  if (x > 1 && y)
   {
     int shift = ctz(y.value());
     Unsigned odd = y >> shift;
+
+    if (odd >= std::numeric_limits<Unsigned>::digits)
+      return;
 
     Entry<Unsigned> base = x.pow(odd);
     Entry<Unsigned> sqrt = base.sqrt();
@@ -183,10 +186,13 @@ template<typename Key>
 template<typename Unsigned>
 void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
 {
-  if (y.den() == 1 && y.num() < std::numeric_limits<Unsigned>::digits && x && x.num() != x.den())
+  if (y.den() == 1 && x && x.num() != x.den())
   {
     int shift = ctz(y.num());
     Unsigned odd = y.num() >> shift;
+
+    if (odd >= std::numeric_limits<Unsigned>::digits)
+      return;
 
     Fraction<Unsigned> base = x.pow(odd);
     Fraction<Unsigned> sqrt = base.sqrt();
