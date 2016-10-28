@@ -1,3 +1,4 @@
+#include "Breakdown.hpp"
 #include "Dictionary.hpp"
 #include "Entry.hpp"
 #include "Expression.hpp"
@@ -12,10 +13,9 @@ static std::size_t find(Unsigned target, int digit, std::size_t limit = -1)
   Chic::Dictionary<Key> dictionary(digit);
 
   if (dictionary.build(target, limit)) {
-    std::cout << target << '#' << digit << ": "
-      << dictionary.level() << " digits used\n--------------------\n"
-      << dictionary.tree(target) << std::endl;
-
+    std::cout << target << '#' << digit << ": " << dictionary.level() << " digits used\n--------------------\n";
+    dictionary.bfs(target, Chic::breakdown<Key>(std::cout));
+    std::cout << std::endl;
     return dictionary.level();
   }
 

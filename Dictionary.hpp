@@ -18,8 +18,9 @@
 #ifndef CHIC_DICTIONARY_HPP
 #define CHIC_DICTIONARY_HPP
 
-#include "IO.hpp"
 #include "Integer.hpp"
+#include <queue>
+#include <stack>
 #include <unordered_map>
 #include <vector>
 
@@ -47,8 +48,6 @@ template<typename Key>
 class Dictionary
 {
   private:
-    class Tree;
-
     std::unordered_map<Key, Expression<Key>> _graph;
     std::vector<std::vector<Key>> _hierarchy;
 
@@ -76,10 +75,14 @@ class Dictionary
     Dictionary(int);
 
     void grow();
-    Expression<Key> build(Key, std::size_t limit = -1);
-    Expression<Key> operator[](Key) const;
+    bool build(Key, std::size_t limit = -1);
     std::size_t level() const;
-    Tree tree(Key) const;
+
+    template<typename Function>
+    Function bfs(Key, Function) const;
+
+    template<typename Function>
+    Function dfs(Key, Function) const;
 };
 
 template<typename Key>
@@ -230,27 +233,19 @@ void Dictionary<Key>::grow()
 }
 
 template<typename Key>
-Expression<Key> Dictionary<Key>::build(Key key, std::size_t limit)
+bool Dictionary<Key>::build(Key key, std::size_t limit)
 {
   while (_hierarchy.size() < limit)
   {
-    if (Expression<Key> found = (*this)[key])
-      return found;
+    auto found = _graph.find(key);
+
+    if (found != _graph.end())
+      return true;
+
     grow();
   }
 
-  return {};
-}
-
-template<typename Key>
-Expression<Key> Dictionary<Key>::operator[](Key key) const
-{
-  auto found = _graph.find(key);
-
-  if (found == _graph.end())
-    return {};
-  else
-    return found->second;
+  return false;
 }
 
 template<typename Key>
@@ -260,46 +255,51 @@ std::size_t Dictionary<Key>::level() const
 }
 
 template<typename Key>
-typename Dictionary<Key>::Tree Dictionary<Key>::tree(Key key) const
+template<typename Function>
+Function Dictionary<Key>::bfs(Key key, Function f) const
 {
-  return { *this, key };
+  typedef std::deque<Key> Container;
+
+  for (std::queue<Key, Container> queue(Container(1, key)); !queue.empty(); queue.pop())
+  {
+    key = queue.front();
+    Expression<Key> expression = _graph.at(key);
+
+    if (expression.symbol())
+    {
+      if (expression.second())
+        queue.push(expression.second());
+
+      queue.push(expression.first());
+      f(key, expression);
+    }
+  }
+
+  return f;
 }
 
 template<typename Key>
-class Dictionary<Key>::Tree : public IO<Dictionary<Key>::Tree>
+template<typename Function>
+Function Dictionary<Key>::dfs(Key key, Function f) const
 {
-  private:
-    const Dictionary& _dictionary;
-    Key _key;
+  typedef std::vector<Key> Container;
 
-  public:
-    Tree(const Dictionary&, Key);
-
-    template<typename Character>
-    std::basic_ostream<Character>& operator()(std::basic_ostream<Character>&) const;
-};
-
-template<typename Key>
-Dictionary<Key>::Tree::Tree(const Dictionary& dict, Key key)
-  : _dictionary(dict),
-    _key(key)
-{}
-
-template<typename Key>
-template<typename Character>
-std::basic_ostream<Character>& Dictionary<Key>::Tree::operator()(std::basic_ostream<Character>& stream) const
-{
-  Expression<Key> expression = _dictionary[_key];
-
-  if (expression.symbol())
+  for (std::stack<Key, Container> stack(Container(1, key)); !stack.empty(); stack.pop())
   {
-    stream << _key << " = " << expression << '\n' << Tree(_dictionary, expression.first());
+    key = stack.top();
+    Expression<Key> expression = _graph.at(key);
 
-    if (expression.second())
-      stream << Tree(_dictionary, expression.second());
+    if (expression.symbol())
+    {
+      f(key, expression);
+      stack.push(expression.first());
+
+      if (expression.second())
+        stack.push(expression.second());
+    }
   }
 
-  return stream;
+  return f;
 }
 
 } // namespace Chic
