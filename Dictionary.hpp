@@ -69,6 +69,7 @@ class Dictionary
     void _pow(Fraction<Unsigned>, Fraction<Unsigned>);
 
     void _binary(Key, Key);
+    void _neighbors(Key, Key);
 
   public:
     const int digit;
@@ -231,6 +232,16 @@ void Dictionary<Key>::_binary(Key x, Key y)
 }
 
 template<typename Key>
+void Dictionary<Key>::_neighbors(Key x, Key y)
+{
+  if (Key ratio = x.factorial(y))
+  {
+    _quadratic(ratio + Key(1), { x, y, '!' + 1 });
+    _quadratic(ratio - Key(1), { x, y, '!' - 1 });
+  }
+}
+
+template<typename Key>
 void Dictionary<Key>::grow()
 {
   _hierarchy.emplace_back();
@@ -244,6 +255,11 @@ void Dictionary<Key>::grow()
     for (Key x: _hierarchy[length - 1])
       for (Key y: _hierarchy[size - length - 1])
         _binary(x, y);
+
+  if (size >= 3)
+    for (Key x: _hierarchy[size - 3])
+      for (Key y: _hierarchy[0])
+        _neighbors(x, y);
 
   _factorial();
 }
