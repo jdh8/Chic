@@ -25,33 +25,33 @@ namespace Chic {
 
 template<typename> class Expression;
 
-template<typename Key, typename Character>
+template<typename Key>
 class Breakdown
 {
   private:
     std::unordered_set<Key> _memo;
-    std::basic_ostream<Character>& _stream;
+    std::ostream& _stream;
 
   public:
-    explicit Breakdown(std::basic_ostream<Character>&);
-    std::basic_ostream<Character>& operator()(Key, Expression<Key>);
+    explicit Breakdown(std::ostream&);
+    std::ostream& operator()(Key, Expression<Key>);
 };
 
-template<typename Key, typename Character>
-Breakdown<Key, Character>::Breakdown(std::basic_ostream<Character>& stream)
+template<typename Key>
+Breakdown<Key>::Breakdown(std::ostream& stream)
   : _stream(stream)
 {}
 
-template<typename Key, typename Character>
-std::basic_ostream<Character>& Breakdown<Key, Character>::operator()(Key key, Expression<Key> expression)
+template<typename Key>
+std::ostream& Breakdown<Key>::operator()(Key key, Expression<Key> expression)
 {
   return _memo.insert(key).second ? _stream << key << " = " << expression << '\n' : _stream;
 }
 
-template<typename Key, typename Character>
-static Breakdown<Key, Character> breakdown(std::basic_ostream<Character>& stream)
+template<typename Key>
+static Breakdown<Key> breakdown(std::ostream& stream)
 {
-  return Breakdown<Key, Character>(stream);
+  return Breakdown<Key>(stream);
 }
 
 } // namespace Chic

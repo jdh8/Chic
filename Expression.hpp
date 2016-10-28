@@ -18,7 +18,7 @@
 #ifndef CHIC_EXPRESSION_HPP
 #define CHIC_EXPRESSION_HPP
 
-#include <iosfwd>
+#include <iostream>
 #include <cstdlib>
 
 namespace Chic {
@@ -78,8 +78,8 @@ Expression<Key>::operator bool() const
   return !!_first;
 }
 
-template<typename Character, typename Key>
-std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, Expression<Key> expression)
+template<typename Key>
+std::ostream& operator<<(std::ostream& stream, Expression<Key> expression)
 {
   Key first = expression.first();
   Key second = expression.second();

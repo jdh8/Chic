@@ -3,7 +3,6 @@
 #include "Entry.hpp"
 #include "Expression.hpp"
 #include "Fraction.hpp"
-#include <iostream>
 #include <sstream>
 #include <cstdint>
 
