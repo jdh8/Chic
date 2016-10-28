@@ -78,8 +78,14 @@ class Dictionary
     bool build(Key, std::size_t limit = -1);
     std::size_t level() const;
 
+    template<typename Container, typename Function>
+    Function bfs(Key, Function) const;
+
     template<typename Function>
     Function bfs(Key, Function) const;
+
+    template<typename Container, typename Function>
+    Function dfs(Key, Function) const;
 
     template<typename Function>
     Function dfs(Key, Function) const;
@@ -255,12 +261,12 @@ std::size_t Dictionary<Key>::level() const
 }
 
 template<typename Key>
-template<typename Function>
+template<typename Container, typename Function>
 Function Dictionary<Key>::bfs(Key key, Function f) const
 {
-  typedef std::deque<Key> Container;
+  Container container = { key };
 
-  for (std::queue<Key, Container> queue(Container(1, key)); !queue.empty(); queue.pop())
+  for (std::queue<Key, Container> queue(container); !queue.empty(); queue.pop())
   {
     key = queue.front();
     Expression<Key> expression = _graph.at(key);
@@ -280,11 +286,18 @@ Function Dictionary<Key>::bfs(Key key, Function f) const
 
 template<typename Key>
 template<typename Function>
+Function Dictionary<Key>::bfs(Key key, Function f) const
+{
+  return bfs<std::deque<Key>>(key, f);
+}
+
+template<typename Key>
+template<typename Container, typename Function>
 Function Dictionary<Key>::dfs(Key key, Function f) const
 {
-  typedef std::vector<Key> Container;
+  Container container = { key };
 
-  for (std::stack<Key, Container> stack(Container(1, key)); !stack.empty(); stack.pop())
+  for (std::stack<Key, Container> stack(container); !stack.empty(); stack.pop())
   {
     key = stack.top();
     Expression<Key> expression = _graph.at(key);
@@ -300,6 +313,13 @@ Function Dictionary<Key>::dfs(Key key, Function f) const
   }
 
   return f;
+}
+
+template<typename Key>
+template<typename Function>
+Function Dictionary<Key>::dfs(Key key, Function f) const
+{
+  return dfs<std::vector<Key>>(key, f);
 }
 
 } // namespace Chic
