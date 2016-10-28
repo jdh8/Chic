@@ -291,11 +291,11 @@ Function Dictionary<Key>::dfs(Key key, Function f) const
 
     if (expression.symbol())
     {
-      f(key, expression);
-      stack.push(expression.first());
-
       if (expression.second())
         stack.push(expression.second());
+
+      stack.push(expression.first());
+      f(key, expression);
     }
   }
 
