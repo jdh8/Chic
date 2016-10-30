@@ -94,8 +94,10 @@ class Dictionary
 };
 
 template<typename Key>
-Dictionary<Key>::Dictionary(int strain)
-  : _graph(Reservation<Key>::size),
+Dictionary<Key>::Dictionary(int strain) :
+  #ifndef __APPLE__
+    _graph(Reservation<Key>::size),
+  #endif
     digit(strain)
 {}
 
