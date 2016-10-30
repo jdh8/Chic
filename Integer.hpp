@@ -65,8 +65,7 @@ Unsigned gcd(Unsigned x, Unsigned y)
 
   x >>= ctz(x);
 
-  while (y)
-  {
+  while (y) {
     y >>= ctz(y);
     if (x > y) std::swap(x, y);
     y -= x;
@@ -80,8 +79,7 @@ Unsigned gcd(Unsigned x, Unsigned y)
 template<typename Unsigned>
 Unsigned gcd(Unsigned x, Unsigned y)
 {
-  while (y)
-  {
+  while (y) {
     x %= y;
     std::swap(x, y);
   }

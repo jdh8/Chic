@@ -38,8 +38,7 @@ template<typename Integer>
 Factorial<Integer>::Factorial()
   : _table(1, 1)
 {
-  for (Integer k = 1; ; ++k)
-  {
+  for (Integer k = 1; ; ++k) {
     Overflow<Integer> candidate = _table.back();
 
     if (candidate *= k)

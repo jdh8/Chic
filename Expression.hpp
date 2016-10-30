@@ -85,19 +85,16 @@ std::ostream& operator<<(std::ostream& stream, Expression<Key> expression)
   Key second = expression.second();
   int symbol = expression.symbol();
 
-  if (second)
-  {
+  if (second) {
     int shift = std::abs(symbol) - 1;
 
-    if (shift < ' ')
-    {
+    if (shift < ' ') {
       for (int k = 0; k < shift; ++k)
         stream << "√";
       return stream << first << (symbol < 0 ? "^-" : "^") << second;
     }
 
-    switch (symbol)
-    {
+    switch (symbol) {
       case '!':
         return stream << first << "! / " << second << '!';
       case '!' + 1:
@@ -108,8 +105,7 @@ std::ostream& operator<<(std::ostream& stream, Expression<Key> expression)
         return stream << first << ' ' << char(symbol) << ' ' << second;
     }
   }
-  else switch (symbol)
-  {
+  else switch (symbol) {
     case '!':
       return stream << first << '!';
     case 's':

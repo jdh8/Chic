@@ -115,8 +115,7 @@ bool Dictionary<Key>::_basic(Key key, Expression<Key> expression)
 template<typename Key>
 void Dictionary<Key>::_quadratic(Key key, Expression<Key> expression)
 {
-  while (_basic(key, expression))
-  {
+  while (_basic(key, expression)) {
     expression = { key, 's' };
     key = key.sqrt();
   }
@@ -128,13 +127,11 @@ void Dictionary<Key>::_factorial()
   std::vector<Key>& destination = _hierarchy.back();
   std::size_t length = destination.size();
 
-  for (std::size_t k = 0; k < length; ++k)
-  {
+  for (std::size_t k = 0; k < length; ++k) {
     Key x = destination[k];
     Key y = x.factorial();
 
-    while (_basic(y, { x, '!' }))
-    {
+    while (_basic(y, { x, '!' })) {
       x = y;
       y = y.factorial();
     }
@@ -163,8 +160,7 @@ template<typename Key>
 template<typename Unsigned>
 void Dictionary<Key>::_pow(Entry<Unsigned> x, Entry<Unsigned> y)
 {
-  if (x > 1 && y)
-  {
+  if (x > 1 && y) {
     int shift = ctz(y.value());
     Unsigned odd = y >> shift;
 
@@ -176,8 +172,7 @@ void Dictionary<Key>::_pow(Entry<Unsigned> x, Entry<Unsigned> y)
 
     _quadratic(sqrt, { x, y, shift + 2 });
 
-    while (shift >= 0 && base)
-    {
+    while (shift >= 0 && base) {
       _basic(base, { x, y, shift + 1 });
 
       base *= base;
@@ -190,8 +185,7 @@ template<typename Key>
 template<typename Unsigned>
 void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
 {
-  if (y.den() == 1 && x && x.num() != x.den())
-  {
+  if (y.den() == 1 && x && x.num() != x.den()) {
     int shift = ctz(y.num());
     Unsigned odd = y.num() >> shift;
 
@@ -204,8 +198,7 @@ void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
     _quadratic(sqrt, { x, y, shift + 2 });
     _quadratic(sqrt.inverse(), { x, y, -(shift + 2) });
 
-    while (shift >= 0 && base)
-    {
+    while (shift >= 0 && base) {
       _basic(base, { x, y, shift + 1 });
       _basic(base.inverse(), { x, y, -(shift + 1) });
 
@@ -236,8 +229,7 @@ void Dictionary<Key>::_binary(Key x, Key y)
 template<typename Key>
 void Dictionary<Key>::_neighbors(Key x, Key y)
 {
-  if (Key ratio = x.factorial(y))
-  {
+  if (Key ratio = x.factorial(y)) {
     _quadratic(ratio + Key(1), { x, y, '!' + 1 });
     _quadratic(ratio - Key(1), { x, y, '!' - 1 });
   }
@@ -269,8 +261,7 @@ void Dictionary<Key>::grow()
 template<typename Key>
 bool Dictionary<Key>::build(Key key, std::size_t limit)
 {
-  while (_hierarchy.size() < limit)
-  {
+  while (_hierarchy.size() < limit) {
     auto found = _graph.find(key);
 
     if (found != _graph.end())
@@ -294,13 +285,11 @@ Function Dictionary<Key>::bfs(Key key, Function f) const
 {
   Container container = { key };
 
-  for (std::queue<Key, Container> queue(container); !queue.empty(); queue.pop())
-  {
+  for (std::queue<Key, Container> queue(container); !queue.empty(); queue.pop()) {
     key = queue.front();
     Expression<Key> expression = _graph.at(key);
 
-    if (expression.symbol())
-    {
+    if (expression.symbol()) {
       if (expression.second())
         queue.push(expression.second());
 
@@ -325,13 +314,11 @@ Function Dictionary<Key>::dfs(Key key, Function f) const
 {
   Container container = { key };
 
-  for (std::stack<Key, Container> stack(container); !stack.empty(); stack.pop())
-  {
+  for (std::stack<Key, Container> stack(container); !stack.empty(); stack.pop()) {
     key = stack.top();
     Expression<Key> expression = _graph.at(key);
 
-    if (expression.symbol())
-    {
+    if (expression.symbol()) {
       if (expression.second())
         stack.push(expression.second());
 
