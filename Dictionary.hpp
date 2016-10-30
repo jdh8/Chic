@@ -222,16 +222,20 @@ void Dictionary<Key>::_binary(Key x, Key y)
   _pow(x, y);
   _pow(y, x);
 
-  _quadratic(x.factorial(y), { x, y, '!' });
-  _quadratic(y.factorial(x), { y, x, '!' });
+  if (!(x.factorial() && y.factorial())) {
+    _quadratic(x.factorial(y), { x, y, '!' });
+    _quadratic(y.factorial(x), { y, x, '!' });
+  }
 }
 
 template<typename Key>
 void Dictionary<Key>::_neighbors(Key x, Key y)
 {
-  if (Key ratio = x.factorial(y)) {
-    _quadratic(ratio + Key(1), { x, y, '!' + 1 });
-    _quadratic(ratio - Key(1), { x, y, '!' - 1 });
+  if (!(x.factorial() && y.factorial())) {
+    if (Key ratio = x.factorial(y)) {
+      _quadratic(ratio + Key(1), { x, y, '!' + 1 });
+      _quadratic(ratio - Key(1), { x, y, '!' - 1 });
+    }
   }
 }
 
