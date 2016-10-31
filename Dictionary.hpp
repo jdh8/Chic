@@ -27,7 +27,7 @@
 
 namespace Chic {
 
-template<typename> class Expression;
+template<typename> class Step;
 template<typename> class Entry;
 template<typename> class Fraction;
 
@@ -49,11 +49,11 @@ template<typename Key>
 class Dictionary
 {
   private:
-    std::unordered_map<Key, Expression<Key>> _graph;
+    std::unordered_map<Key, Step<Key>> _graph;
     std::vector<std::vector<Key>> _hierarchy;
 
-    bool _basic(Key, Expression<Key>);
-    void _quadratic(Key, Expression<Key>);
+    bool _basic(Key, Step<Key>);
+    void _quadratic(Key, Step<Key>);
     void _factorial();
 
     template<typename Unsigned>
@@ -102,7 +102,7 @@ Dictionary<Key>::Dictionary(int strain) :
 {}
 
 template<typename Key>
-bool Dictionary<Key>::_basic(Key key, Expression<Key> expression)
+bool Dictionary<Key>::_basic(Key key, Step<Key> expression)
 {
   bool status = key && _graph.emplace(key, expression).second;
 
@@ -113,7 +113,7 @@ bool Dictionary<Key>::_basic(Key key, Expression<Key> expression)
 }
 
 template<typename Key>
-void Dictionary<Key>::_quadratic(Key key, Expression<Key> expression)
+void Dictionary<Key>::_quadratic(Key key, Step<Key> expression)
 {
   while (_basic(key, expression)) {
     expression = { key, 's' };
@@ -291,7 +291,7 @@ Function Dictionary<Key>::bfs(Key key, Function f) const
 
   for (std::queue<Key, Container> queue(container); !queue.empty(); queue.pop()) {
     key = queue.front();
-    Expression<Key> expression = _graph.at(key);
+    Step<Key> expression = _graph.at(key);
 
     if (expression.symbol()) {
       if (expression.second())
@@ -320,7 +320,7 @@ Function Dictionary<Key>::dfs(Key key, Function f) const
 
   for (std::stack<Key, Container> stack(container); !stack.empty(); stack.pop()) {
     key = stack.top();
-    Expression<Key> expression = _graph.at(key);
+    Step<Key> expression = _graph.at(key);
 
     if (expression.symbol()) {
       if (expression.second())

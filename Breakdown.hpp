@@ -23,7 +23,7 @@
 
 namespace Chic {
 
-template<typename> class Expression;
+template<typename> class Step;
 
 template<typename Key>
 class Breakdown
@@ -34,7 +34,7 @@ class Breakdown
 
   public:
     explicit Breakdown(std::ostream&);
-    std::ostream& operator()(Key, Expression<Key>);
+    std::ostream& operator()(Key, Step<Key>);
 };
 
 template<typename Key>
@@ -43,7 +43,7 @@ Breakdown<Key>::Breakdown(std::ostream& stream)
 {}
 
 template<typename Key>
-std::ostream& Breakdown<Key>::operator()(Key key, Expression<Key> expression)
+std::ostream& Breakdown<Key>::operator()(Key key, Step<Key> expression)
 {
   return _memo.insert(key).second ? _stream << key << " = " << expression << '\n' : _stream;
 }

@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef CHIC_EXPRESSION_HPP
-#define CHIC_EXPRESSION_HPP
+#ifndef CHIC_STEP_HPP
+#define CHIC_STEP_HPP
 
 #include <iostream>
 #include <cstdlib>
@@ -24,7 +24,7 @@
 namespace Chic {
 
 template<typename Key>
-class Expression
+class Step
 {
   private:
     Key _first;
@@ -32,8 +32,8 @@ class Expression
     int _symbol;
 
   public:
-    Expression(Key = {}, int = 0);
-    Expression(Key, Key, int);
+    Step(Key = {}, int = 0);
+    Step(Key, Key, int);
 
     Key first() const;
     Key second() const;
@@ -42,44 +42,44 @@ class Expression
 };
 
 template<typename Key>
-Expression<Key>::Expression(Key first, int symbol)
+Step<Key>::Step(Key first, int symbol)
   : _first(first),
     _symbol(symbol)
 {}
 
 template<typename Key>
-Expression<Key>::Expression(Key first, Key second, int symbol)
+Step<Key>::Step(Key first, Key second, int symbol)
   : _first(first),
     _second(second),
     _symbol(symbol)
 {}
 
 template<typename Key>
-Key Expression<Key>::first() const
+Key Step<Key>::first() const
 {
   return _first;
 }
 
 template<typename Key>
-Key Expression<Key>::second() const
+Key Step<Key>::second() const
 {
   return _second;
 }
 
 template<typename Key>
-int Expression<Key>::symbol() const
+int Step<Key>::symbol() const
 {
   return _symbol;
 }
 
 template<typename Key>
-Expression<Key>::operator bool() const
+Step<Key>::operator bool() const
 {
   return !!_first;
 }
 
 template<typename Key>
-std::ostream& operator<<(std::ostream& stream, Expression<Key> expression)
+std::ostream& operator<<(std::ostream& stream, Step<Key> expression)
 {
   Key first = expression.first();
   Key second = expression.second();
@@ -117,4 +117,4 @@ std::ostream& operator<<(std::ostream& stream, Expression<Key> expression)
 
 } // namespace Chic
 
-#endif // CHIC_EXPRESSION_HPP
+#endif // CHIC_STEP_HPP
