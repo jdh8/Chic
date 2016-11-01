@@ -35,6 +35,9 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction& _apply(Fraction);
 
   public:
+    static Fraction inf();
+    static Fraction nan();
+
     Fraction();
     Fraction(Unsigned);
     Fraction(Unsigned, Unsigned);
@@ -88,6 +91,26 @@ Fraction<Unsigned>::Fraction(Concatenate_t, std::size_t repeats, int digit)
   : _num(concatenate<Unsigned>(repeats, digit)),
     _den(1)
 {}
+
+template<typename Unsigned>
+Fraction<Unsigned> Fraction<Unsigned>::inf()
+{
+  Fraction result;
+
+  result._num = 1;
+
+  return result;
+}
+
+template<typename Unsigned>
+Fraction<Unsigned> Fraction<Unsigned>::nan()
+{
+  Fraction result;
+
+  result._num = 0;
+
+  return result;
+}
 
 template<typename Unsigned>
 Unsigned Fraction<Unsigned>::num() const
@@ -151,7 +174,7 @@ Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 
   result._num = std::sqrt(num());
   result._den = std::sqrt(den());
-  
+
   bool valid = (result._num * result._num == num()) && (result._den * result._den == den());
 
   result._num *= valid || !den();
@@ -187,7 +210,7 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial(Fraction other) const
       return num() > other.num() ? fraction : fraction.inverse();
     }
   }
-  return { 0, 0 };
+  return nan();
 }
 
 template<typename Unsigned>
@@ -210,7 +233,7 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(Fraction exponent) const
   if (exponent.den() == 1)
     return pow(exponent.num());
   else
-    return { 0, 0 };
+    return nan();
 }
 
 template<typename Unsigned>
@@ -284,6 +307,18 @@ template<typename Unsigned>
 bool isfinite(Chic::Fraction<Unsigned> fraction)
 {
   return fraction.den();
+}
+
+template<typename Unsigned>
+bool isinf(Chic::Fraction<Unsigned> fraction)
+{
+  return fraction.num() && !fraction.den();
+}
+
+template<typename Unsigned>
+bool isnan(Chic::Fraction<Unsigned> fraction)
+{
+  return !(fraction.num() || fraction.den());
 }
 
 template<typename Unsigned>
