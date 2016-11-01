@@ -245,7 +245,7 @@ void Dictionary<Key>::grow()
   _hierarchy.emplace_back();
 
   std::size_t size = level();
-  Key root(size, digit);
+  Key root(Concatenate, size, digit);
 
   _quadratic(root, root);
 

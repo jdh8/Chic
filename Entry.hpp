@@ -19,6 +19,7 @@
 #define CHIC_ENTRY_HPP
 
 #include "Arithmetic.hpp"
+#include "Integer.hpp"
 #include "Overflow.hpp"
 #include "Factorial.hpp"
 #include <cmath>
@@ -33,7 +34,7 @@ class Entry : public Arithmetic<Entry<Unsigned>>
 
   public:
     Entry(Unsigned = 0);
-    Entry(std::size_t, int);
+    Entry(Concatenate_t, std::size_t, int);
 
     operator Unsigned() const;
     Unsigned value() const;
@@ -57,12 +58,9 @@ Entry<Unsigned>::Entry(Unsigned value)
 {}
 
 template<typename Unsigned>
-Entry<Unsigned>::Entry(std::size_t repeats, int digit)
-  : _value(0)
-{
-  while (repeats--)
-    _value = 10 * _value + digit;
-}
+Entry<Unsigned>::Entry(Concatenate_t, std::size_t repeats, int digit)
+  : _value(concatenate<Unsigned>(repeats, digit))
+{}
 
 template<typename Unsigned>
 Entry<Unsigned>::operator Unsigned() const

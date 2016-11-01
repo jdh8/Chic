@@ -24,6 +24,19 @@
 
 namespace Chic {
 
+struct Concatenate_t {} Concatenate;
+
+template<typename Unsigned>
+Unsigned concatenate(std::size_t repeats, int digit)
+{
+  Unsigned value = 0;
+
+  while (repeats--)
+    value = 10 * value + digit;
+
+  return value;
+}
+
 #ifdef __GNUC__
 
 inline

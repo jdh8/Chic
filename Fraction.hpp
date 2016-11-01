@@ -48,7 +48,7 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction();
     Fraction(Unsigned);
     Fraction(Unsigned, Unsigned);
-    Fraction(std::size_t, int);
+    Fraction(Concatenate_t, std::size_t, int);
 
     Unsigned num() const;
     Unsigned den() const;
@@ -94,13 +94,10 @@ Fraction<Unsigned>::Fraction(Unsigned num, Unsigned den)
 }
 
 template<typename Unsigned>
-Fraction<Unsigned>::Fraction(std::size_t repeats, int digit)
-  : _num(0),
+Fraction<Unsigned>::Fraction(Concatenate_t, std::size_t repeats, int digit)
+  : _num(concatenate<Unsigned>(repeats, digit)),
     _den(1)
-{
-  while (repeats--)
-    _num = 10 * _num + digit;
-}
+{}
 
 template<typename Unsigned>
 Unsigned Fraction<Unsigned>::num() const
