@@ -22,17 +22,7 @@
 #include <iostream>
 
 namespace Chic {
-/*!
- * \brief Nonnegative fraction with exact arithmetic
- *
- * \tparam Unsigned  Underlying unsigned type
- *
- * Exact elementary arithmetic, exponentiation, and square root are provided.
- * If the result is not representable, nan is returned.
- *
- * Unsigned integer overflow wraps around, but signed integer overflow causes
- * undefined behavior.  Therefore, the underlying type must be unsigned.
- */
+
 template<typename Unsigned>
 class Fraction : public Arithmetic<Fraction<Unsigned>>
 {
