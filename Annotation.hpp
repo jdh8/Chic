@@ -29,17 +29,31 @@ class Annotation
     typedef typename std::make_signed<Character>::type Signed;
 
     Character _base;
-    Signed _annotation;
+    Signed _code;
 
   public:
     Annotation(Character = 0, Signed = 0);
+    Character base() const;
+    Signed code() const;
 };
 
 template<typename Character>
-Annotation<Character>::Annotation(Character base, Signed annotation)
+Annotation<Character>::Annotation(Character base, Signed code)
   : _base(base),
-    _annotation(annotation)
+    _code(code)
 {}
+
+template<typename Character>
+Character Annotation<Character>::base() const
+{
+  return _base;
+}
+
+template<typename Character>
+Signed Annotation<Character>::code() const
+{
+  return _code;
+}
 
 } // namespace Chic
 
