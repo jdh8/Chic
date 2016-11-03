@@ -19,7 +19,7 @@
 #define CHIC_FRACTION_HPP
 
 #include "Integer.hpp"
-#include <iostream>
+#include <iosfwd>
 
 namespace Chic {
 
@@ -288,15 +288,17 @@ bool operator==(Fraction<Unsigned> x, Fraction<Unsigned> y)
   return x.den() && x.den() == y.den() && x.num() == y.num();
 }
 
-template<typename Unsigned>
-std::ostream& operator<<(std::ostream& stream, Fraction<Unsigned> fraction)
+template<typename Character, typename Unsigned>
+std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream, Fraction<Unsigned> fraction)
 {
   if (fraction.den() == 1)
     return stream << fraction.num();
   else if (fraction.den())
     return stream << '(' << fraction.num() << '/' << fraction.den() << ')';
+  else if (fraction.num())
+    return stream << 'i' << 'n' << 'f';
   else
-    return stream << (fraction.num() ? "inf" : "nan");
+    return stream << 'n' << 'a' << 'n';
 }
 
 } // namespace Chic
