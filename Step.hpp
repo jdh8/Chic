@@ -80,11 +80,11 @@ Step<Key>::operator bool() const
 }
 
 template<typename Key>
-std::ostream& operator<<(std::ostream& stream, Step<Key> expression)
+std::ostream& operator<<(std::ostream& stream, Step<Key> step)
 {
-  Key first = expression.first();
-  Key second = expression.second();
-  int symbol = expression.symbol();
+  Key first = step.first();
+  Key second = step.second();
+  int symbol = step.symbol();
 
   if (second) {
     int shift = std::abs(symbol) - 1;

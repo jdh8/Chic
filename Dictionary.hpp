@@ -101,9 +101,9 @@ Dictionary<Key>::Dictionary(int strain) :
 {}
 
 template<typename Key>
-bool Dictionary<Key>::_basic(Key key, Step<Key> expression)
+bool Dictionary<Key>::_basic(Key key, Step<Key> step)
 {
-  bool status = std::isnormal(key) && _graph.emplace(key, expression).second;
+  bool status = std::isnormal(key) && _graph.emplace(key, step).second;
 
   if (status)
     _hierarchy.back().emplace_back(key);
@@ -112,10 +112,10 @@ bool Dictionary<Key>::_basic(Key key, Step<Key> expression)
 }
 
 template<typename Key>
-void Dictionary<Key>::_quadratic(Key key, Step<Key> expression)
+void Dictionary<Key>::_quadratic(Key key, Step<Key> step)
 {
-  while (_basic(key, expression)) {
-    expression = { key, 's' };
+  while (_basic(key, step)) {
+    step = { key, 's' };
     key = key.sqrt();
   }
 }
@@ -292,14 +292,14 @@ Function Dictionary<Key>::bfs(Key key, Function f) const
 
   for (std::queue<Key, Container> queue(container); !queue.empty(); queue.pop()) {
     key = queue.front();
-    Step<Key> expression = _graph.at(key);
+    Step<Key> step = _graph.at(key);
 
-    if (expression.symbol()) {
-      if (expression.second())
-        queue.push(expression.second());
+    if (step.symbol()) {
+      if (step.second())
+        queue.push(step.second());
 
-      queue.push(expression.first());
-      f(key, expression);
+      queue.push(step.first());
+      f(key, step);
     }
   }
 
@@ -321,14 +321,14 @@ Function Dictionary<Key>::dfs(Key key, Function f) const
 
   for (std::stack<Key, Container> stack(container); !stack.empty(); stack.pop()) {
     key = stack.top();
-    Step<Key> expression = _graph.at(key);
+    Step<Key> step = _graph.at(key);
 
-    if (expression.symbol()) {
-      if (expression.second())
-        stack.push(expression.second());
+    if (step.symbol()) {
+      if (step.second())
+        stack.push(step.second());
 
-      stack.push(expression.first());
-      f(key, expression);
+      stack.push(step.first());
+      f(key, step);
     }
   }
 

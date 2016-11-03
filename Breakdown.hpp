@@ -43,9 +43,9 @@ Breakdown<Key>::Breakdown(std::ostream& stream)
 {}
 
 template<typename Key>
-std::ostream& Breakdown<Key>::operator()(Key key, Step<Key> expression)
+std::ostream& Breakdown<Key>::operator()(Key key, Step<Key> step)
 {
-  return _memo.insert(key).second ? _stream << key << " = " << expression << '\n' : _stream;
+  return _memo.insert(key).second ? _stream << key << " = " << step << '\n' : _stream;
 }
 
 template<typename Key>
