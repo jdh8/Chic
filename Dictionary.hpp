@@ -18,8 +18,7 @@
 #ifndef CHIC_DICTIONARY_HPP
 #define CHIC_DICTIONARY_HPP
 
-#include "Integer.hpp"
-#include "Overflow.hpp"
+#include "Fraction.hpp"
 #include <queue>
 #include <stack>
 #include <unordered_map>
@@ -104,7 +103,7 @@ Dictionary<Key>::Dictionary(int strain) :
 template<typename Key>
 bool Dictionary<Key>::_basic(Key key, Step<Key> expression)
 {
-  bool status = key && _graph.emplace(key, expression).second;
+  bool status = std::isnormal(key) && _graph.emplace(key, expression).second;
 
   if (status)
     _hierarchy.back().emplace_back(key);
@@ -185,7 +184,7 @@ template<typename Key>
 template<typename Unsigned>
 void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
 {
-  if (y.den() == 1 && x && x.num() != x.den()) {
+  if (y.den() == 1 && std::isnormal(x) && x.num() != x.den()) {
     int shift = ctz(y.num());
     Unsigned odd = y.num() >> shift;
 
@@ -198,7 +197,7 @@ void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
     _quadratic(sqrt, { x, y, shift + 2 });
     _quadratic(sqrt.inverse(), { x, y, -(shift + 2) });
 
-    while (shift >= 0 && base) {
+    while (shift >= 0 && std::isnormal(base)) {
       _basic(base, { x, y, shift + 1 });
       _basic(base.inverse(), { x, y, -(shift + 1) });
 
@@ -222,7 +221,7 @@ void Dictionary<Key>::_binary(Key x, Key y)
   _pow(x, y);
   _pow(y, x);
 
-  if (!(x.factorial() && y.factorial())) {
+  if (!(std::isnormal(x.factorial()) && std::isnormal(y.factorial()))) {
     _quadratic(x.factorial(y), { x, y, '!' });
     _quadratic(y.factorial(x), { y, x, '!' });
   }
@@ -231,8 +230,10 @@ void Dictionary<Key>::_binary(Key x, Key y)
 template<typename Key>
 void Dictionary<Key>::_neighbors(Key x, Key y)
 {
-  if (!(x.factorial() && y.factorial())) {
-    if (Key ratio = x.factorial(y)) {
+  if (!(std::isnormal(x.factorial()) && std::isnormal(y.factorial()))) {
+    Key ratio = x.factorial(y);
+
+    if (std::isnormal(ratio)) {
       _quadratic(ratio + Key(1), { x, y, '!' + 1 });
       _quadratic(ratio - Key(1), { x, y, '!' - 1 });
     }

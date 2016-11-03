@@ -156,6 +156,12 @@ Entry<Unsigned> Entry<Unsigned>::factorial(Unsigned lesser) const
 namespace std {
 
 template<typename Unsigned>
+bool isnormal(Chic::Entry<Unsigned> entry)
+{
+  return entry;
+}
+
+template<typename Unsigned>
 struct hash<Chic::Entry<Unsigned>> : hash<Unsigned>
 {};
 

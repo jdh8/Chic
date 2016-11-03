@@ -44,6 +44,7 @@ class Step
 template<typename Key>
 Step<Key>::Step(Key first, int symbol)
   : _first(first),
+    _second(0),
     _symbol(symbol)
 {}
 

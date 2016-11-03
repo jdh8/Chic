@@ -18,7 +18,7 @@
 #ifndef CHIC_FRACTION_HPP
 #define CHIC_FRACTION_HPP
 
-#include "Integer.hpp"
+#include "Entry.hpp"
 #include <iosfwd>
 
 namespace Chic {
@@ -127,7 +127,7 @@ Unsigned Fraction<Unsigned>::den() const
 template<typename Unsigned>
 Fraction<Unsigned>::operator bool() const
 {
-  return num() && den();
+  return num() || !den();
 }
 
 template<typename Unsigned>
@@ -321,6 +321,12 @@ template<typename Unsigned>
 bool isnan(Chic::Fraction<Unsigned> fraction)
 {
   return !(fraction.num() || fraction.den());
+}
+
+template<typename Unsigned>
+bool isnormal(Chic::Fraction<Unsigned> fraction)
+{
+  return fraction.num() && fraction.den();
 }
 
 template<typename Unsigned>
