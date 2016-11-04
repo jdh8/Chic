@@ -181,11 +181,9 @@ Fraction<Unsigned> Fraction<Unsigned>::square() const
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 {
-  Fraction result(Canonical, Chic::factorial(_num), !!result._num);
+  Unsigned essay = Chic::factorial(_num);
 
-  result._num = result._num | (den() == 1 && !result._num);
-
-  return result;
+  return { Canonical, essay | (den() == 1 && !essay), !!essay };
 }
 
 template<typename Unsigned>
