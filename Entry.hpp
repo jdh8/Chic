@@ -33,7 +33,8 @@ class Entry : public Arithmetic<Entry<Unsigned>>
     Overflow<Unsigned> _value;
 
   public:
-    Entry(Unsigned = 0);
+    Entry() = default;
+    Entry(Unsigned);
     Entry(Concatenate_t, std::size_t, int);
 
     operator Unsigned() const;

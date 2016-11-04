@@ -27,6 +27,8 @@ template<typename Unsigned>
 class Fraction : public Arithmetic<Fraction<Unsigned>>
 {
   private:
+    struct Canonical_t {};
+
     Overflow<Unsigned> _num;
     Overflow<Unsigned> _den;
 
@@ -35,12 +37,15 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction& _apply(Fraction);
 
   public:
+    static Canonical_t Canonical;
+
     static Fraction inf();
     static Fraction nan();
 
-    Fraction();
+    Fraction() = default;
     Fraction(Unsigned);
     Fraction(Unsigned, Unsigned);
+    Fraction(Canonical_t, Unsigned, Unsigned);
     Fraction(Concatenate_t, std::size_t, int);
 
     Unsigned num() const;
@@ -65,11 +70,6 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
 };
 
 template<typename Unsigned>
-Fraction<Unsigned>::Fraction()
-  : _den(0)
-{}
-
-template<typename Unsigned>
 Fraction<Unsigned>::Fraction(Unsigned value)
   : _num(value),
     _den(1)
@@ -87,6 +87,12 @@ Fraction<Unsigned>::Fraction(Unsigned num, Unsigned den)
 }
 
 template<typename Unsigned>
+Fraction<Unsigned>::Fraction(Canonical_t, Unsigned num, Unsigned den)
+  : _num(num),
+    _den(den)
+{}
+
+template<typename Unsigned>
 Fraction<Unsigned>::Fraction(Concatenate_t, std::size_t repeats, int digit)
   : _num(concatenate<Unsigned>(repeats, digit)),
     _den(1)
@@ -95,21 +101,13 @@ Fraction<Unsigned>::Fraction(Concatenate_t, std::size_t repeats, int digit)
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::inf()
 {
-  Fraction result;
-
-  result._num = 1;
-
-  return result;
+  return { Canonical, 1, 0 };
 }
 
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::nan()
 {
-  Fraction result;
-
-  result._num = 0;
-
-  return result;
+  return { Canonical, 0, 0 };
 }
 
 template<typename Unsigned>
@@ -159,22 +157,13 @@ Fraction<Unsigned>& Fraction<Unsigned>::_apply(Fraction other)
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::inverse() const
 {
-  Fraction result;
-
-  result._num = den();
-  result._den = num() * !!den();
-
-  return result;
+  return { Canonical, den(), num() * !!den() };
 }
 
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::sqrt() const
 {
-  Fraction result;
-
-  result._num = std::sqrt(num());
-  result._den = std::sqrt(den());
-
+  Fraction result(Canonical, std::sqrt(num()), std::sqrt(den()));
   bool valid = (result._num * result._num == num()) && (result._den * result._den == den());
 
   result._num *= valid || !den();
@@ -192,10 +181,8 @@ Fraction<Unsigned> Fraction<Unsigned>::square() const
 template<typename Unsigned>
 Fraction<Unsigned> Fraction<Unsigned>::factorial() const
 {
-  Fraction result;
+  Fraction result(Canonical, Chic::factorial(_num), !!result._num);
 
-  result._num = Chic::factorial(_num);
-  result._den = !!result._num;
   result._num = result._num | (den() == 1 && !result._num);
 
   return result;
