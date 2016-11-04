@@ -18,7 +18,7 @@
 #ifndef CHIC_STEP_HPP
 #define CHIC_STEP_HPP
 
-#include <iostream>
+#include <ostream>
 #include <cstdlib>
 
 namespace Chic {
