@@ -295,11 +295,11 @@ Function Dictionary<Key>::bfs(Key key, Function f) const
     Step<Key> step = _graph.at(key);
 
     if (step.note().base()) {
+      f(key, step);
+      queue.push(step.first());
+
       if (step.second())
         queue.push(step.second());
-
-      queue.push(step.first());
-      f(key, step);
     }
   }
 
@@ -323,7 +323,7 @@ Function Dictionary<Key>::dfs(Key key, Function f) const
     key = stack.top();
     Step<Key> step = _graph.at(key);
 
-    if (step.symbol()) {
+    if (step.note().base()) {
       if (step.second())
         stack.push(step.second());
 
