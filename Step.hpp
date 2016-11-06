@@ -20,6 +20,8 @@
 
 #include "Annotation.hpp"
 #include <ostream>
+#include <cassert>
+#include <cmath>
 #include <cstdlib>
 
 namespace Chic {
@@ -82,18 +84,31 @@ Step<Key>::operator bool() const
 
 namespace detail {
 
+[[noreturn]] inline void unreachable()
+{
+  #ifdef _MSC_VER
+    __assume(0);
+  #elif __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 5 // GCC >= 4.5
+    __builtin_unreachable();
+  #else
+    std::abort();
+  #endif
+}
+
 template<typename Key>
 std::ostream& print_shifted_power(std::ostream& stream, signed char code, Key first, Key second)
 {
-  const char infix[][3] = { "^", "^-" };
-  bool negative = code < 0;
-  unsigned char cast = code;
-  unsigned char shift = negative ? ~cast : cast;
+  int shift = std::signbit(code) ? ~code : code;
 
   for (int iterations = 0; iterations < shift; ++iterations)
     stream << "√";
 
-  return stream << first << infix[negative] << second;
+  stream << first << '^';
+
+  if (std::signbit(code))
+    stream << '-';
+
+  return stream << second;
 }
 
 template<typename Key>
@@ -110,8 +125,8 @@ std::ostream& print_factorial_quotient(std::ostream& stream, signed char code, K
       return stream << '(' << first << "! + " << second << "!) / " << second << '!';
   }
 
-  //TODO Find a better way to handle this error
-  throw Annotation<char>('!', code);
+  assert(!"Invalid bytecode for factorial quotient");
+  unreachable();
 }
 
 } // namespace detail
