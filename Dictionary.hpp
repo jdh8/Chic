@@ -169,10 +169,10 @@ void Dictionary<Key>::_pow(Entry<Unsigned> x, Entry<Unsigned> y)
     Entry<Unsigned> base = x.pow(odd);
     Entry<Unsigned> sqrt = base.sqrt();
 
-    _quadratic(sqrt, { x, y, shift + 2 });
+    _quadratic(sqrt, { x, y, {'^', shift + 1} });
 
     while (shift >= 0 && base) {
-      _basic(base, { x, y, shift + 1 });
+      _basic(base, { x, y, {'^', shift} });
 
       base *= base;
       --shift;
@@ -194,12 +194,12 @@ void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
     Fraction<Unsigned> base = x.pow(odd);
     Fraction<Unsigned> sqrt = base.sqrt();
 
-    _quadratic(sqrt, { x, y, shift + 2 });
-    _quadratic(sqrt.inverse(), { x, y, -(shift + 2) });
+    _quadratic(sqrt, { x, y, {'^', shift + 1} });
+    _quadratic(sqrt.inverse(), { x, y, {'^', ~(shift + 1)} });
 
     while (shift >= 0 && std::isnormal(base)) {
-      _basic(base, { x, y, shift + 1 });
-      _basic(base.inverse(), { x, y, -(shift + 1) });
+      _basic(base, { x, y, {'^', shift} });
+      _basic(base.inverse(), { x, y, {'^', ~shift} });
 
       base = base.square();
       --shift;
@@ -222,8 +222,8 @@ void Dictionary<Key>::_binary(Key x, Key y)
   _pow(y, x);
 
   if (!(std::isnormal(x.factorial()) && std::isnormal(y.factorial()))) {
-    _quadratic(x.factorial(y), { x, y, '!' });
-    _quadratic(y.factorial(x), { y, x, '!' });
+    _quadratic(x.factorial(y), { x, y, {'!', '/'} });
+    _quadratic(y.factorial(x), { y, x, {'!', '/'} });
   }
 }
 
@@ -234,8 +234,8 @@ void Dictionary<Key>::_neighbors(Key x, Key y)
     Key ratio = x.factorial(y);
 
     if (std::isnormal(ratio)) {
-      _quadratic(ratio + Key(1), { x, y, '!' + 1 });
-      _quadratic(ratio - Key(1), { x, y, '!' - 1 });
+      _quadratic(ratio + Key(1), { x, y, {'!', '+'} });
+      _quadratic(ratio - Key(1), { x, y, {'!', '-'} });
     }
   }
 }
@@ -294,7 +294,7 @@ Function Dictionary<Key>::bfs(Key key, Function f) const
     key = queue.front();
     Step<Key> step = _graph.at(key);
 
-    if (step.symbol()) {
+    if (step.note().base()) {
       if (step.second())
         queue.push(step.second());
 

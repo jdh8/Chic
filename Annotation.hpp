@@ -27,12 +27,14 @@ class Annotation
 {
   private:
     typedef typename std::make_signed<Character>::type Signed;
+    typedef typename std::char_traits<Character>::int_type Integer;
 
     Character _base;
     Signed _code;
 
   public:
     Annotation(Character = 0, Signed = 0);
+    Annotation(Character, Integer);
     Character base() const;
     Signed code() const;
 };
@@ -44,13 +46,19 @@ Annotation<Character>::Annotation(Character base, Signed code)
 {}
 
 template<typename Character>
+Annotation<Character>::Annotation(Character base, Integer code)
+  : _base(base),
+    _code(code)
+{}
+
+template<typename Character>
 Character Annotation<Character>::base() const
 {
   return _base;
 }
 
 template<typename Character>
-Signed Annotation<Character>::code() const
+typename Annotation<Character>::Signed Annotation<Character>::code() const
 {
   return _code;
 }
