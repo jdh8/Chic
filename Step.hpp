@@ -21,7 +21,6 @@
 #include "Annotation.hpp"
 #include "IO.hpp"
 #include <cassert>
-#include <cmath>
 #include <cstdlib>
 
 namespace Chic {
@@ -98,14 +97,16 @@ namespace detail {
 template<typename Key>
 std::ostream& print_shifted_power(std::ostream& stream, signed char code, Key first, Key second)
 {
-  int shift = std::signbit(code) ? ~code : code;
+  bool negative = code < 0;
+  unsigned char cast = code;
+  int shift = negative ? ~cast : cast;
 
   for (int iterations = 0; iterations < shift; ++iterations)
     stream << radic;
 
   stream << first << '^';
 
-  if (std::signbit(code))
+  if (negative)
     stream << '-';
 
   return stream << second;

@@ -195,11 +195,11 @@ void Dictionary<Key>::_pow(Fraction<Unsigned> x, Fraction<Unsigned> y)
     Fraction<Unsigned> sqrt = base.sqrt();
 
     _quadratic(sqrt, { x, y, {'^', shift + 1} });
-    _quadratic(sqrt.inverse(), { x, y, {'^', ~(shift + 1)} });
+    _quadratic(sqrt.inverse(), { x, y, {'^', -shift - 2} });
 
     while (shift >= 0 && std::isnormal(base)) {
       _basic(base, { x, y, {'^', shift} });
-      _basic(base.inverse(), { x, y, {'^', ~shift} });
+      _basic(base.inverse(), { x, y, {'^', -shift - 1} });
 
       base = base.square();
       --shift;
