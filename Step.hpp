@@ -122,7 +122,7 @@ std::ostream& print_factorial_quotient(std::ostream& stream, signed char code, K
     case '+':
       return stream << '(' << first << "! + " << second << "!) / " << second << '!';
     case '-':
-      return stream << '(' << first << "! + " << second << "!) / " << second << '!';
+      return stream << '(' << first << "! - " << second << "!) / " << second << '!';
   }
 
   assert(!"Invalid bytecode for factorial quotient");
