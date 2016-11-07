@@ -19,7 +19,7 @@
 #define CHIC_STEP_HPP
 
 #include "Annotation.hpp"
-#include <ostream>
+#include "IO.hpp"
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
@@ -101,7 +101,7 @@ std::ostream& print_shifted_power(std::ostream& stream, signed char code, Key fi
   int shift = std::signbit(code) ? ~code : code;
 
   for (int iterations = 0; iterations < shift; ++iterations)
-    stream << "√";
+    stream << radic;
 
   stream << first << '^';
 
@@ -140,7 +140,7 @@ std::ostream& operator<<(std::ostream& stream, Step<Key> step)
     case '!':
       return detail::print_factorial_quotient(stream, step.note().code(), step.first(), step.second());
     case 's':
-      return stream << "√" << step.first();
+      return stream << radic << step.first();
     default:
       return stream << step.first() << ' ' << base << ' ' << step.second();
   }
