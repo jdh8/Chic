@@ -99,7 +99,7 @@ std::ostream& print_shifted_power(std::ostream& stream, signed char code, Key fi
 {
   bool negative = code < 0;
   unsigned char cast = code;
-  int shift = negative ? ~cast : cast;
+  unsigned char shift = negative ? ~cast : cast;
 
   for (int iterations = 0; iterations < shift; ++iterations)
     stream << radic;
