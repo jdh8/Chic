@@ -97,9 +97,8 @@ namespace detail {
 template<typename Key>
 std::ostream& print_shifted_power(std::ostream& stream, signed char code, Key first, Key second)
 {
-  bool negative = code < 0;
-  unsigned char cast = code;
-  unsigned char shift = negative ? ~cast : cast;
+  bool negative = std::signbit(code);
+  int shift = negative ? ~code : code;
 
   for (int iterations = 0; iterations < shift; ++iterations)
     stream << radic;
