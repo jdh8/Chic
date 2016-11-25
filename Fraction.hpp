@@ -184,6 +184,7 @@ Fraction<Unsigned> Fraction<Unsigned>::factorial() const
   if (den() == 1) {
     if (Unsigned essay = Chic::factorial(_num))
       return essay;
+
     return inf();
   }
   return nan();
@@ -220,8 +221,8 @@ Fraction<Unsigned> Fraction<Unsigned>::pow(Fraction exponent) const
 {
   if (exponent.den() == 1)
     return pow(exponent.num());
-  else
-    return nan();
+
+  return nan();
 }
 
 template<typename Unsigned>
@@ -281,12 +282,14 @@ std::basic_ostream<Character>& operator<<(std::basic_ostream<Character>& stream,
 {
   if (fraction.den() == 1)
     return stream << fraction.num();
-  else if (fraction.den())
+
+  if (fraction.den())
     return stream << '(' << fraction.num() << '/' << fraction.den() << ')';
-  else if (fraction.num())
+
+  if (fraction.num())
     return stream << 'i' << 'n' << 'f';
-  else
-    return stream << 'n' << 'a' << 'n';
+
+  return stream << 'n' << 'a' << 'n';
 }
 
 } // namespace Chic

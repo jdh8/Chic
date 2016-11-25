@@ -40,11 +40,8 @@ Factorial<Integer>::Factorial()
 {
   for (Integer k = 1; ; ++k) {
     Overflow<Integer> candidate = _table.back();
-
-    if (candidate *= k)
-      break;
-    else
-      _table.push_back(candidate);
+    if (candidate *= k) break;
+    _table.push_back(candidate);
   }
 }
 
