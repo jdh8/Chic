@@ -27,8 +27,6 @@ template<typename Unsigned>
 class Fraction : public Arithmetic<Fraction<Unsigned>>
 {
   private:
-    struct Canonical_t {};
-
     Overflow<Unsigned> _num;
     Overflow<Unsigned> _den;
 
@@ -37,7 +35,8 @@ class Fraction : public Arithmetic<Fraction<Unsigned>>
     Fraction& _apply(Fraction);
 
   public:
-    static Canonical_t Canonical;
+    enum class Canonical_t {};
+    static const Canonical_t Canonical = {};
 
     static Fraction inf();
     static Fraction nan();

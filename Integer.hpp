@@ -24,7 +24,8 @@
 
 namespace Chic {
 
-struct Concatenate_t {} Concatenate;
+struct Concatenate_t {};
+const Concatenate_t Concatenate = {};
 
 template<typename Unsigned>
 Unsigned concatenate(std::size_t repeats, int digit)
