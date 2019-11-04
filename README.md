@@ -1,5 +1,8 @@
 Chic
 ====
+This repository is being archived because other free, faster, and more complete
+solvers exist.  I have something more beneficial to do.  Farewell!
+
 Tchisla is a math puzzle to make a target number with only one kind of digits,
 operators +, -, \*, /, ^, !, √, and parentheses.  The fewer the digits, the
 higher the score.
